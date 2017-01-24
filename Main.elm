@@ -12,6 +12,8 @@ import Math.Vector3 as Vec3 exposing (vec3, Vec3)
 import Time exposing (Time)
 import WebGL exposing (Mesh, Shader)
 
+import API exposing (..)
+
 
 main : Program Never Time Time
 main =
