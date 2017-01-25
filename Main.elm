@@ -18,14 +18,14 @@ import WebGL.Texture as Texture exposing (Texture, Error)
 import Window
 
 type alias Object =
-    { transform: Vec3
-    , vertices: List Vec3
+    { transform: Mat4
+    , mesh: Mesh Vertex
     , texture: Maybe Int
     }
 
 
 type alias Model =
-    { entities: List Entity
+    { objects: List Object
     , textures: List (Maybe Texture)
     , keys : Keys
     , size : Window.Size
@@ -70,10 +70,18 @@ eyeLevel =
     2
 
 
+primitive : Mesh Vertex -> Object
+primitive mesh =
+    { transform = Mat4.identity
+    , mesh = mesh
+    , texture = Maybe.Nothing
+    }
+
+
 init : ( Model, Cmd Msg )
 init =
     ( { textures = []
-      , entities = []
+      , objects = [ primitive crate ]
       , person = Person (vec3 0 eyeLevel -10) (vec3 0 0 0)
       , keys = Keys False False False False False
       , size = Window.Size 0 0
@@ -200,7 +208,7 @@ gravity dt person =
 
 
 view : Model -> Html Msg
-view { size, person, entities, textures } =
+view { size, person, objects, textures } =
     div
         [ style
             [ ( "width", toString size.width ++ "px" )
@@ -216,9 +224,7 @@ view { size, person, entities, textures } =
             , height size.height
             , style [ ( "display", "block" ) ]
             ]
-            (textures
-                |> Maybe.map (scene size person entities)
-                |> Maybe.withDefault []
+            ((scene size person objects [])
             )
         , div
             [ style
@@ -240,14 +246,15 @@ message =
     "Walk around with a first person perspective.\n"
         ++ "Arrows keys to move, space bar to jump."
 
-toEntity : Object -> Entity
-toEntity object =
+toEntity : Mat4 -> Object -> Entity
+toEntity perspective object  =
     WebGL.entity
         vertexShader
         fragmentShader
-        crate
+        object.mesh
         { perspective = perspective
-        , texture = Maybe.Nothing
+        -- , texture = object.texture
+        , color = vec3 1 0 1
         }
 
 
@@ -259,7 +266,7 @@ scene { width, height } person objects textures =
                 (Mat4.makePerspective 45 (toFloat width / toFloat height) 0.01 100)
                 (Mat4.makeLookAt person.position (Vec3.add person.position Vec3.k) Vec3.j)
     in
-        List.map objects (toEntity perspective)
+        List.map (toEntity perspective) objects
 
 
 
@@ -324,7 +331,7 @@ square =
 
 
 type alias Uniforms =
-    { texture : Texture
+    { color : Vec3
     , perspective : Mat4
     }
 
@@ -351,11 +358,11 @@ fragmentShader =
     [glsl|
 
         precision mediump float;
-        uniform sampler2D texture;
+        uniform vec3 color;
         varying vec2 vcoord;
 
         void main () {
-          gl_FragColor = texture2D(texture, vcoord);
+          gl_FragColor = vec4(color, 1.0);
         }
 
     |]
