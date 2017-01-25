@@ -17,9 +17,16 @@ import WebGL exposing (Mesh, Shader, Entity)
 import WebGL.Texture as Texture exposing (Texture, Error)
 import Window
 
+type alias Object =
+    { transform: Vec3
+    , vertices: List Vec3
+    , texture: Maybe Int
+    }
+
 
 type alias Model =
-    { texture : Maybe Texture
+    { entities: List Entity
+    , textures: List (Maybe Texture)
     , keys : Keys
     , size : Window.Size
     , person : Person
@@ -65,7 +72,8 @@ eyeLevel =
 
 init : ( Model, Cmd Msg )
 init =
-    ( { texture = Nothing
+    ( { textures = []
+      , entities = []
       , person = Person (vec3 0 eyeLevel -10) (vec3 0 0 0)
       , keys = Keys False False False False False
       , size = Window.Size 0 0
@@ -91,7 +99,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update action model =
     case action of
         TextureLoaded textureResult ->
-            ( { model | texture = Result.toMaybe textureResult }, Cmd.none )
+            ( { model | textures = [ Result.toMaybe textureResult ] }, Cmd.none )
 
         KeyChange on code ->
             ( { model | keys = keyFunc on code model.keys }, Cmd.none )
@@ -192,7 +200,7 @@ gravity dt person =
 
 
 view : Model -> Html Msg
-view { size, person, texture } =
+view { size, person, entities, textures } =
     div
         [ style
             [ ( "width", toString size.width ++ "px" )
@@ -208,8 +216,8 @@ view { size, person, texture } =
             , height size.height
             , style [ ( "display", "block" ) ]
             ]
-            (texture
-                |> Maybe.map (scene size person)
+            (textures
+                |> Maybe.map (scene size person entities)
                 |> Maybe.withDefault []
             )
         , div
@@ -232,23 +240,26 @@ message =
     "Walk around with a first person perspective.\n"
         ++ "Arrows keys to move, space bar to jump."
 
+toEntity : Object -> Entity
+toEntity object =
+    WebGL.entity
+        vertexShader
+        fragmentShader
+        crate
+        { perspective = perspective
+        , texture = Maybe.Nothing
+        }
 
-scene : Window.Size -> Person -> Texture -> List Entity
-scene { width, height } person texture =
+
+scene : Window.Size -> Person -> List Object -> List Texture -> List Entity
+scene { width, height } person objects textures =
     let
         perspective =
             Mat4.mul
                 (Mat4.makePerspective 45 (toFloat width / toFloat height) 0.01 100)
                 (Mat4.makeLookAt person.position (Vec3.add person.position Vec3.k) Vec3.j)
     in
-        [ WebGL.entity
-            vertexShader
-            fragmentShader
-            crate
-            { texture = texture
-            , perspective = perspective
-            }
-        ]
+        List.map objects (toEntity perspective)
 
 
 
