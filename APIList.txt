@@ -1,0 +1,304 @@
+-- Utils
+
+clear = Nothing
+
+when : Bool -> (a -> Nothing) -> Nothing
+when test fn =
+    if (test)
+        fn
+
+selfTest
+
+-- Framing
+
+everyFrame : (Float -> List FCommand) -> List Primitive
+everyFrame func =
+    []
+
+showFps
+
+desiredFps
+
+-- Drawing
+
+drawCube = FCommand
+
+drawSphere = FCommand
+
+drawTorus = FCommand
+
+drawPlane = FCommand
+
+drawCylinder = FCommand
+
+-- Building
+
+buildCube : FCommand -> Int
+buildCube = Nothing
+
+buildSphere : FCommand -> Int
+buildSphere = Nothing
+
+buildPlane : FCommand -> Int
+buildPlane = Nothing
+
+buildCylinder : FCommand -> Int
+buildCylinder = Nothing
+
+buildTorus : FCommand -> Int
+buildTorus = Nothing
+
+buildPolygons
+
+buildLine
+
+buuldSegPlane
+
+buildNurbsSphere
+
+buildNurbsPlane
+
+buildLocator
+
+buildBlobby
+
+destroy : Primitive -> Nothing
+destroy = Nothing
+
+withPrimitive : Primitive -> (Primitive -> Nothing) -> FCommand
+withPrimitive = Nothing
+
+drawInstance : Primitive -> FCommand
+
+pixelPrimitive
+
+pixelsUpload
+
+-- Object Tree
+
+parent : Primitive -> Nothing
+parent = Nothing
+
+detach : Primitive -> Nothing
+detach = Nothing
+
+-- State Manipulation
+
+withState : State -> (State -> Nothing) -> FCommand
+withState = Nothing
+
+colour : Vec3 -> State
+colour = Nothing
+
+rotate : Vec3 -> State
+rotate = Nothing
+
+scale : Vec3 -> State
+scale = Nothing
+
+translate : Vec3 -> State
+translate = Nothing
+
+-- Sound
+
+startAudio : String -> Mbps -> HerzRate
+startAudio jackPort mbps herz = Nothing
+
+gh : Int -> Float
+gh harmonic = Nothing
+
+gain : Float -> Nothing
+gain value = Nothing
+
+-- Keyboard
+
+keyPressed : String -> Bool
+keyPressed = Nothing
+
+keySpecialPressed: Int -> Bool
+
+keysDown : List String
+keysDown = Nothing
+
+-- Mouse
+
+mouseX : Float
+mouseY : Float
+
+select: Float -> Float -> Float -> Int
+select screenX screenY size = 0
+
+-- OSC
+
+oscSource : Int -> Nothing
+oscSource port = Nothing
+
+oscMsg : String -> Bool
+oscMsg msg = False
+
+-- Time
+
+time : Float
+
+delta : Float
+
+-- Primitives Materials
+
+wireColour
+
+lineWidth
+
+pointWidth
+
+specular : Vec3
+
+ambient : Vec3
+
+emissive : Vec3
+
+shinyness : Vec3
+
+opacity : Float
+
+blendMode
+
+-- Textures
+
+texture : Image
+
+loadTexture : String -> Image
+
+clearTextureCache
+
+textureParams
+
+multiTexture
+
+-- Light
+
+makeLight
+
+lightPosition
+
+lightDirection
+
+lightDiffuse
+
+lightSpecular
+
+lightSpotAngle
+
+lightSpotExponent
+
+
+-- Shadows
+
+hintCastShadow
+
+shadowLight
+
+-- Hints
+
+hintNone
+
+hintNormal
+
+hintWire
+
+hintOrigin
+
+hintUnlit
+
+-- Primitives
+
+PData.Set
+
+PData.Ref
+
+PData.Size
+
+PData.Map
+
+PData.Fold
+
+...
+
+-- Text
+
+buildType
+
+buildExtrudedType
+
+buildText
+
+-- Camera
+
+lockCamera
+
+cameraLag
+
+setCameraTransform
+
+resetCamera
+
+-- Perspective
+
+ortho
+
+setOrthoZoom
+
+persp
+
+clip
+
+fog
+
+-- Random
+
+rndf
+
+crndf
+
+grndf
+
+rndvec
+
+crndvec
+
+srndvec
+
+hsrndvec
+
+grndvec
+
+-- Scene
+
+getChildren
+
+getParent
+
+-- Collision
+
+-- Ray casting
+
+-- Shaders
+
+-- Turtle
+
+turtleReset
+
+turtlePrim
+
+buildLoop
+
+turtleBuild
+
+turlteTurn
+
+turtleMove
+
+turtleVert
+
+-- Fluxa
+
+-- Physics
