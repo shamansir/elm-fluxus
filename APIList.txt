@@ -31,6 +31,12 @@ drawPlane = FCommand
 
 drawCylinder = FCommand
 
+drawInstance : Primitive -> FCommand
+
+pixelPrimitive
+
+pixelsUpload
+
 -- Building
 
 buildCube : FCommand -> Int
@@ -67,12 +73,6 @@ destroy = Nothing
 
 withPrimitive : Primitive -> (Primitive -> Nothing) -> FCommand
 withPrimitive = Nothing
-
-drawInstance : Primitive -> FCommand
-
-pixelPrimitive
-
-pixelsUpload
 
 -- Object Tree
 
