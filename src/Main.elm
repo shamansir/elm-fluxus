@@ -17,29 +17,13 @@ import WebGL exposing (Mesh, Shader, Entity)
 import WebGL.Texture as Texture exposing (Texture, Error)
 import Window
 
-import Fluxus
-
-type alias Object =
-    { transform: Mat4
-    , mesh: Mesh Vertex
-    , texture: Maybe Int
-    }
-
+import Fluxus.Scene as Scene exposing (Scene)
 
 type alias Model =
-    { objects: List Object
-    , textures: List (Maybe Texture)
+    { scene: Scene
     , keys : Keys
     , size : Window.Size
-    , person : Person
     }
-
-
-type alias Person =
-    { position : Vec3
-    , velocity : Vec3
-    }
-
 
 type Msg
     = TextureLoaded (Result Error Texture)
@@ -70,14 +54,6 @@ main =
 eyeLevel : Float
 eyeLevel =
     2
-
-
-primitive : Mesh Vertex -> Object
-primitive mesh =
-    { transform = Mat4.identity
-    , mesh = mesh
-    , texture = Maybe.Nothing
-    }
 
 
 init : ( Model, Cmd Msg )
@@ -210,7 +186,7 @@ gravity dt person =
 
 
 view : Model -> Html Msg
-view { size, person, objects, textures } =
+view { scene, size } =
     div
         [ style
             [ ( "width", toString size.width ++ "px" )
@@ -226,7 +202,7 @@ view { size, person, objects, textures } =
             , height size.height
             , style [ ( "display", "block" ) ]
             ]
-            ((scene size person objects [])
+            ((scene size person)
             )
         , div
             [ style
@@ -273,60 +249,6 @@ scene { width, height } person objects textures =
 
 
 -- Mesh
-
-
-type alias Vertex =
-    { position : Vec3
-    , coord : Vec2
-    }
-
-
-crate : Mesh Vertex
-crate =
-    [ ( 0, 0 ), ( 90, 0 ), ( 180, 0 ), ( 270, 0 ), ( 0, 90 ), ( 0, -90 ) ]
-        |> List.concatMap rotatedSquare
-        |> WebGL.triangles
-
-
-rotatedSquare : ( Float, Float ) -> List ( Vertex, Vertex, Vertex )
-rotatedSquare ( angleXZ, angleYZ ) =
-    let
-        transformMat =
-            Mat4.mul
-                (Mat4.makeRotate (degrees angleXZ) Vec3.j)
-                (Mat4.makeRotate (degrees angleYZ) Vec3.i)
-
-        transform vertex =
-            { vertex
-                | position =
-                    Mat4.transform transformMat vertex.position
-            }
-
-        transformTriangle ( a, b, c ) =
-            ( transform a, transform b, transform c )
-    in
-        List.map transformTriangle square
-
-
-square : List ( Vertex, Vertex, Vertex )
-square =
-    let
-        topLeft =
-            Vertex (vec3 -1 1 1) (vec2 0 1)
-
-        topRight =
-            Vertex (vec3 1 1 1) (vec2 1 1)
-
-        bottomLeft =
-            Vertex (vec3 -1 -1 1) (vec2 0 0)
-
-        bottomRight =
-            Vertex (vec3 1 -1 1) (vec2 1 0)
-    in
-        [ ( topLeft, topRight, bottomLeft )
-        , ( bottomLeft, topRight, bottomRight )
-        ]
-
 
 
 -- Shaders
