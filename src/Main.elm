@@ -17,6 +17,8 @@ import WebGL exposing (Mesh, Shader, Entity)
 import WebGL.Texture as Texture exposing (Texture, Error)
 import Window
 
+import Fluxus
+
 type alias Object =
     { transform: Mat4
     , mesh: Mesh Vertex
