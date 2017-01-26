@@ -75,6 +75,50 @@ square =
         , ( bottomLeft, topRight, bottomRight )
         ]
 
+toEntity : Mat4 -> Primitive -> Entity
+toEntity perspective object  =
+    WebGL.entity
+        vertexShader
+        fragmentShader
+        object.mesh
+        { perspective = perspective
+        -- , texture = object.texture
+        , color = vec3 1 0 1
+        }
+
+type alias Uniforms =
+    { color : Vec3
+    , perspective : Mat4
+    }
 
 
+vertexShader : Shader Vertex Uniforms { vcoord : Vec2 }
+vertexShader =
+    [glsl|
 
+        attribute vec3 position;
+        attribute vec2 coord;
+        uniform mat4 perspective;
+        varying vec2 vcoord;
+
+        void main () {
+          gl_Position = perspective * vec4(position, 1.0);
+          vcoord = coord;
+        }
+
+    |]
+
+
+fragmentShader : Shader {} Uniforms { vcoord : Vec2 }
+fragmentShader =
+    [glsl|
+
+        precision mediump float;
+        uniform vec3 color;
+        varying vec2 vcoord;
+
+        void main () {
+          gl_FragColor = vec4(color, 1.0);
+        }
+
+    |]
