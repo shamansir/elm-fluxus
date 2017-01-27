@@ -37,7 +37,8 @@ type alias Keys =
     , space : Bool
     }
 
-type alias Renderer = (Float -> Float -> List Primitive)
+-- type alias Renderer = (Float -> Float -> List Primitive)
+type alias Renderer = (() -> List Primitive)
 
 render : Scene -> Float -> Float -> List Entity
 render scene dt time =
@@ -49,7 +50,7 @@ render scene dt time =
                 (Mat4.makePerspective 45 (toFloat width / toFloat height) 0.01 100)
                 (Mat4.makeLookAt person.position (Vec3.add person.position Vec3.k) Vec3.j)
     in
-        List.concatMap (\renderer -> renderer dt time) scene.renderers
+        List.concatMap (\renderer -> renderer ()) scene.renderers
             |> List.map (Primitive.toEntity perspective)
 
 animate : Scene -> Float -> Scene
@@ -161,11 +162,6 @@ empty =
 addRenderer : Scene -> Renderer -> Scene
 addRenderer scene renderer =
     { scene | renderers = renderer :: scene.renderers }
-
-sceneWithACrate : Scene
-sceneWithACrate =
-    (\_ _ -> [ Primitive.build crate ])
-    |> addRenderer empty
 
 type Msg
     = TextureLoaded (Result Error Texture)

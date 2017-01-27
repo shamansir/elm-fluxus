@@ -14,19 +14,26 @@ type alias Model = Scene.Scene
 type alias FluxusProgram = Program Never Model Msg
 
 run : FluxusProgram
-run = Html.program
-        { init = init
+run =
+    runWith Scene.empty
+
+
+runWith : Scene.Scene -> FluxusProgram
+runWith scene =
+    Html.program
+        { init = Scene.start scene
         , view = view
         , subscriptions = Scene.subscriptions
         , update = Scene.update
         }
 
-init : ( Model, Cmd Msg )
-init =
-    Scene.start Scene.sceneWithACrate
+-- everyFrame : Renderer
+
+everyFrame : Scene.Renderer -> FluxusProgram
+everyFrame renderer =
+    runWith (Scene.addRenderer Scene.empty renderer)
 
 -- View
-
 
 view : Model -> Html Msg
 view scene =
