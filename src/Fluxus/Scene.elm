@@ -1,7 +1,13 @@
 module Fluxus.Scene exposing (..)
 
-import Math.Vector2 as Vec2 exposing (Vec2, vec2)
+import AnimationFrame
+
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
+import Math.Matrix4 as Mat4 exposing (Mat4)
+import Task exposing (Task)
+import Time exposing (Time)
+import WebGL exposing (Mesh, Shader, Entity)
+import WebGL.Texture as Texture exposing (Texture, Error)
 
 import Fluxus.Primitive as Primitive exposing (..)
 
@@ -18,7 +24,8 @@ type alias Scene =
     , person: Person
     , size: Window.Size
     , keys: Keys
-
+    , delta: Float
+    , time: Float
     }
 
 type alias Keys =
@@ -31,9 +38,18 @@ type alias Keys =
 
 type alias Renderer = (Float -> List Primitive)
 
-addRenderer : Scene -> Renderer -> Scene
-addRenderer scene renderer =
-    { scene | renderers = renderer :: scene.renderers }
+render : Scene -> Float -> List Entity
+render scene time =
+    let
+        { person, size } = scene
+        { width, height } = size
+        perspective =
+            Mat4.mul
+                (Mat4.makePerspective 45 (toFloat width / toFloat height) 0.01 100)
+                (Mat4.makeLookAt person.position (Vec3.add person.position Vec3.k) Vec3.j)
+    in
+        List.concatMap (\renderer -> renderer time) scene.renderers
+            |> List.map (Primitive.toEntity perspective)
 
 eyeLevel : Float
 eyeLevel =
@@ -120,14 +136,63 @@ sceneWithACrate =
       , person = Person (vec3 0 eyeLevel -10) (vec3 0 0 0)
       , keys = Keys False False False False False
       , size = Window.Size 0 0
+      , delta = 0
+      , time = 0
       }
 
--- scene : Window.Size -> Person -> List Object -> List Texture -> List Entity
--- scene { width, height } person objects textures =
---     let
---         perspective =
---             Mat4.mul
---                 (Mat4.makePerspective 45 (toFloat width / toFloat height) 0.01 100)
---                 (Mat4.makeLookAt person.position (Vec3.add person.position Vec3.k) Vec3.j)
---     in
---         List.map (toEntity perspective) objects
+type Msg
+    = TextureLoaded (Result Error Texture)
+    | KeyChange Bool Keyboard.KeyCode
+    | Animate Time
+    | Resize Window.Size
+    | AddRenderer Renderer
+
+start : Scene -> ( Scene, Cmd Msg )
+start scene =
+    ( scene
+    , Cmd.batch
+        [ Task.attempt TextureLoaded (Texture.load "texture/wood-crate.jpg")
+        , Task.perform Resize Window.size
+        ]
+    )
+
+update : Msg -> Scene -> ( Scene, Cmd Msg )
+update action scene =
+    case action of
+        TextureLoaded textureResult ->
+            ( scene, Cmd.none )
+            -- ( { model | textures = [ Result.toMaybe textureResult ] }, Cmd.none )
+
+        KeyChange on code ->
+            ( { scene | keys = keyFunc on code scene.keys }, Cmd.none )
+
+        Resize size ->
+            ( { scene | size = size }, Cmd.none )
+
+        Animate dt ->
+            ( { scene
+                | person =
+                    scene.person
+                        |> move scene.keys
+                        |> gravity (dt / 500)
+                        |> physics (dt / 500)
+                , time = scene.time + dt
+                , delta = dt
+              }
+            , Cmd.none
+            )
+
+        AddRenderer renderer ->
+            ( { scene | renderers = renderer :: scene.renderers }
+            , Cmd.none
+            )
+
+
+subscriptions : Scene -> Sub Msg
+subscriptions _ =
+    Sub.batch
+        [ AnimationFrame.diffs Animate
+        , Keyboard.downs (KeyChange True)
+        , Keyboard.ups (KeyChange False)
+        , Window.resizes Resize
+        ]

@@ -1,7 +1,7 @@
 module Main exposing (main)
 
-import Fluxus.Program as FluxusProgram
+import Fluxus.Program as Fx
 
-main : FluxusProgram.Program
+main : Fx.FluxusProgram
 main =
-    FluxusProgram.run
+    Fx.run

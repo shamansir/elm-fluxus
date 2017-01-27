@@ -11,6 +11,8 @@ type alias Primitive =
     { transform: Mat4
     , mesh: Mesh Vertex
     , texture: Maybe Texture
+    -- , parent: Primitive
+    -- , children: List Primitive
     }
 
 drawCube : Int
@@ -76,13 +78,13 @@ square =
         ]
 
 toEntity : Mat4 -> Primitive -> Entity
-toEntity perspective object  =
+toEntity perspective primitive  =
     WebGL.entity
         vertexShader
         fragmentShader
-        object.mesh
+        primitive.mesh
         { perspective = perspective
-        -- , texture = object.texture
+        -- , texture = primitive.texture
         , color = vec3 1 0 1
         }
 
