@@ -31,7 +31,7 @@ init =
 view : Model -> Html Msg
 view scene =
     let
-        { size, time } = scene
+        { size, time, entities } = scene
     in
         div
             [ style
@@ -48,7 +48,7 @@ view scene =
                 , height size.height
                 , style [ ( "display", "block" ) ]
                 ]
-                (Scene.render scene time)
+                entities
             , div
                 [ style
                     [ ( "position", "absolute" )

@@ -21,6 +21,7 @@ type alias Person =
 
 type alias Scene =
     { renderers: List Renderer
+    , entities: List Entity
     , person: Person
     , size: Window.Size
     , keys: Keys
@@ -36,10 +37,10 @@ type alias Keys =
     , space : Bool
     }
 
-type alias Renderer = (Float -> List Primitive)
+type alias Renderer = (Float -> Float -> List Primitive)
 
-render : Scene -> Float -> List Entity
-render scene time =
+render : Scene -> Float -> Float -> List Entity
+render scene dt time =
     let
         { person, size } = scene
         { width, height } = size
@@ -48,8 +49,24 @@ render scene time =
                 (Mat4.makePerspective 45 (toFloat width / toFloat height) 0.01 100)
                 (Mat4.makeLookAt person.position (Vec3.add person.position Vec3.k) Vec3.j)
     in
-        List.concatMap (\renderer -> renderer time) scene.renderers
+        List.concatMap (\renderer -> renderer dt time) scene.renderers
             |> List.map (Primitive.toEntity perspective)
+
+animate : Scene -> Float -> Scene
+animate scene dt =
+    let
+        newTime = scene.time + dt
+    in
+        { scene
+        | person =
+            scene.person
+                |> move scene.keys
+                |> gravity (dt / 500)
+                |> physics (dt / 500)
+        , entities = (render scene dt newTime)
+        , time = newTime
+        , delta = dt
+        }
 
 eyeLevel : Float
 eyeLevel =
@@ -130,15 +147,25 @@ gravity dt person =
     else
         person
 
+empty : Scene
+empty =
+    { renderers = [ ]
+    , entities = [ ]
+    , person = Person (vec3 0 eyeLevel -10) (vec3 0 0 0)
+    , keys = Keys False False False False False
+    , size = Window.Size 0 0
+    , delta = 0
+    , time = 0
+    }
+
+addRenderer : Scene -> Renderer -> Scene
+addRenderer scene renderer =
+    { scene | renderers = renderer :: scene.renderers }
+
 sceneWithACrate : Scene
 sceneWithACrate =
-      { renderers = [ (\_ -> [ Primitive.build crate ]) ]
-      , person = Person (vec3 0 eyeLevel -10) (vec3 0 0 0)
-      , keys = Keys False False False False False
-      , size = Window.Size 0 0
-      , delta = 0
-      , time = 0
-      }
+    (\_ _ -> [ Primitive.build crate ])
+    |> addRenderer empty
 
 type Msg
     = TextureLoaded (Result Error Texture)
@@ -170,20 +197,10 @@ update action scene =
             ( { scene | size = size }, Cmd.none )
 
         Animate dt ->
-            ( { scene
-                | person =
-                    scene.person
-                        |> move scene.keys
-                        |> gravity (dt / 500)
-                        |> physics (dt / 500)
-                , time = scene.time + dt
-                , delta = dt
-              }
-            , Cmd.none
-            )
+            ( dt |> animate scene, Cmd.none )
 
         AddRenderer renderer ->
-            ( { scene | renderers = renderer :: scene.renderers }
+            ( renderer |> addRenderer scene
             , Cmd.none
             )
 
