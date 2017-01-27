@@ -21,6 +21,7 @@ type Msg
     | KeyChange Bool Keyboard.KeyCode
     | Animate Time
     | Resize Window.Size
+    | AddRenderer Scene.Renderer
 
 type alias Model =
     { scene: Scene

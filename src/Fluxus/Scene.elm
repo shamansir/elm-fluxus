@@ -14,10 +14,12 @@ type alias Person =
     }
 
 type alias Scene =
-    { person: Person
+    { renderers: List Renderer
+    , person: Person
     , size: Window.Size
     , keys: Keys
-    , primitives: List Primitive }
+
+    }
 
 type alias Keys =
     { left : Bool
@@ -26,6 +28,12 @@ type alias Keys =
     , down : Bool
     , space : Bool
     }
+
+type alias Renderer = (Float -> List Primitive)
+
+addRenderer : Scene -> Renderer -> Scene
+addRenderer scene renderer =
+    { scene | renderers = renderer :: scene.renderers }
 
 eyeLevel : Float
 eyeLevel =
@@ -108,7 +116,7 @@ gravity dt person =
 
 sceneWithACrate : Scene
 sceneWithACrate =
-      { primitives = [ Primitive.build crate ]
+      { renderers = [ (\_ -> [ Primitive.build crate ]) ]
       , person = Person (vec3 0 eyeLevel -10) (vec3 0 0 0)
       , keys = Keys False False False False False
       , size = Window.Size 0 0
