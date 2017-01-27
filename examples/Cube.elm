@@ -5,4 +5,4 @@ import Fluxus.Program as Fx
 main : Fx.FluxusProgram
 main =
     Fx.everyFrame
-        (\_ -> [ build crate ])
+        (\_ -> [ drawCube ])

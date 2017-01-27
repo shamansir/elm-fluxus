@@ -15,11 +15,12 @@ type alias Primitive =
     -- , children: List Primitive
     }
 
-drawCube : Int
-drawCube = 0
+drawCube : Primitive
+drawCube =
+    draw buildCube
 
-build : Mesh Vertex -> Primitive
-build mesh =
+draw : Mesh Vertex -> Primitive
+draw mesh =
     { transform = Mat4.identity
     , mesh = mesh
     , texture = Maybe.Nothing
@@ -31,8 +32,8 @@ type alias Vertex =
     }
 
 
-crate : Mesh Vertex
-crate =
+buildCube : Mesh Vertex
+buildCube =
     [ ( 0, 0 ), ( 90, 0 ), ( 180, 0 ), ( 270, 0 ), ( 0, 90 ), ( 0, -90 ) ]
         |> List.concatMap rotatedSquare
         |> WebGL.triangles

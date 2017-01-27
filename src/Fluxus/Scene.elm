@@ -73,6 +73,10 @@ eyeLevel : Float
 eyeLevel =
     2
 
+-- unit: Float
+-- unit =
+--    1
+
 keyFunc : Bool -> Keyboard.KeyCode -> Keys -> Keys
 keyFunc on keyCode keys =
     case keyCode of
