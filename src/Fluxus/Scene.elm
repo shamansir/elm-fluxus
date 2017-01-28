@@ -10,6 +10,7 @@ import WebGL exposing (Mesh, Shader, Entity)
 import WebGL.Texture as Texture exposing (Texture, Error)
 
 import Fluxus.Primitive as Primitive exposing (..)
+import Fluxus.State as State exposing (..)
 
 import Keyboard
 import Window
@@ -27,6 +28,7 @@ type alias Scene =
     , keys: Keys
     , delta: Float
     , time: Float
+    , state: State
     }
 
 type alias Keys =
@@ -38,10 +40,10 @@ type alias Keys =
     }
 
 -- type alias Renderer = (Float -> Float -> List Primitive)
-type alias Renderer = (() -> List Primitive)
+type alias Renderer = (Scene -> List Primitive)
 
-render : Scene -> Float -> Float -> List Entity
-render scene dt time =
+render : Float -> Float -> Scene -> List Entity
+render dt time scene =
     let
         { person, size } = scene
         { width, height } = size
@@ -53,8 +55,8 @@ render scene dt time =
         List.concatMap (\renderer -> renderer ()) scene.renderers
             |> List.map (Primitive.toEntity perspective)
 
-animate : Scene -> Float -> Scene
-animate scene dt =
+animate : Float -> Scene -> Scene
+animate dt scene =
     let
         newTime = scene.time + dt
     in
@@ -163,8 +165,8 @@ empty =
     , time = 0
     }
 
-addRenderer : Scene -> Renderer -> Scene
-addRenderer scene renderer =
+addRenderer : Renderer -> Scene -> Scene
+addRenderer renderer scene =
     { scene | renderers = renderer :: scene.renderers }
 
 type Msg
