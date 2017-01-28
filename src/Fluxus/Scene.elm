@@ -26,8 +26,6 @@ type alias Scene =
     , person: Person
     , size: Window.Size
     , keys: Keys
-    , delta: Float
-    , time: Float
     , state: State
     }
 
@@ -40,7 +38,7 @@ type alias Keys =
     }
 
 -- type alias Renderer = (Float -> Float -> List Primitive)
-type alias Renderer = (Scene -> List Primitive)
+type alias Renderer = (State -> List Primitive)
 
 render : Float -> Float -> Scene -> List Entity
 render dt time scene =
@@ -52,13 +50,14 @@ render dt time scene =
                 (Mat4.makePerspective 45 (toFloat width / toFloat height) 0.01 100)
                 (Mat4.makeLookAt person.position (Vec3.add person.position Vec3.k) Vec3.j)
     in
-        List.concatMap (\renderer -> renderer ()) scene.renderers
+        List.concatMap (\renderer -> renderer scene.state) scene.renderers
             |> List.map (Primitive.toEntity perspective)
 
 animate : Float -> Scene -> Scene
 animate dt scene =
     let
-        newTime = scene.time + dt
+        prevState = scene.state
+        newTime = prevState.time + dt
     in
         { scene
         | person =
@@ -66,9 +65,8 @@ animate dt scene =
                 |> move scene.keys
                 |> gravity (dt / 500)
                 |> physics (dt / 500)
-        , entities = (render scene dt newTime)
-        , time = newTime
-        , delta = dt
+        , entities = (render dt newTime scene)
+        , state = prevState |> advance dt
         }
 
 eyeLevel : Float
@@ -161,8 +159,7 @@ empty =
     , person = Person (vec3 0 eyeLevel -10) (vec3 0 0 0)
     , keys = Keys False False False False False
     , size = Window.Size 0 0
-    , delta = 0
-    , time = 0
+    , state = State.init
     }
 
 addRenderer : Renderer -> Scene -> Scene
