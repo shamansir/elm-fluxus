@@ -6,6 +6,7 @@ import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 
 import WebGL exposing (Mesh, Shader, Entity)
 import Fluxus.Texture exposing (Texture)
+import Fluxus.State exposing (State)
 
 type alias Primitive =
     { transform: Mat4
@@ -15,8 +16,8 @@ type alias Primitive =
     -- , children: List Primitive
     }
 
-drawCube : Primitive
-drawCube =
+drawCube : State -> Primitive
+drawCube state =
     draw buildCube
 
 draw : Mesh Vertex -> Primitive

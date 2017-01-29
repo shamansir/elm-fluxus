@@ -16,4 +16,4 @@ main =
           |> rotate (vector 0 45 0)
           |> colour (vector 0 0.5 1)
           |> drawCube
-          ])
+          )

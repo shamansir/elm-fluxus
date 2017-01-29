@@ -31,14 +31,15 @@ runWith scene =
 
 everyFrame : Scene.Renderer -> FluxusProgram
 everyFrame renderer =
-    runWith (Scene.addRenderer Scene.empty renderer)
+    runWith (Scene.empty |> Scene.addRenderer renderer)
 
 -- View
 
 view : Model -> Html Msg
 view scene =
     let
-        { size, time, entities } = scene
+        { size, entities, state } = scene
+        { time } = state
     in
         div
             [ style

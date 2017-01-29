@@ -38,6 +38,7 @@ type alias Keys =
     }
 
 -- type alias Renderer = (Float -> Float -> List Primitive)
+-- type alias Renderer = (State -> List Primitive)
 type alias Renderer = (State -> List Primitive)
 
 render : Float -> Float -> Scene -> List Entity
@@ -196,10 +197,10 @@ update action scene =
             ( { scene | size = size }, Cmd.none )
 
         Animate dt ->
-            ( dt |> animate scene, Cmd.none )
+            ( scene |> animate dt, Cmd.none )
 
         AddRenderer renderer ->
-            ( renderer |> addRenderer scene
+            ( scene |> addRenderer renderer
             , Cmd.none
             )
 
