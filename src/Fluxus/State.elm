@@ -9,6 +9,7 @@ type alias State =
     (
         { colour: Vec3
         , transform: Mat4
+        , perspective: Mat4
         , delta: Float
         , time: Float
         }
@@ -19,6 +20,7 @@ init : State
 init =
     ( { colour = (vec3 0 0 0)
       , transform = Mat4.identity
+      , perspective = Mat4.identity
       , delta = 0
       , time = 0
       }

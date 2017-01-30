@@ -16,16 +16,15 @@ type alias Primitive =
     -- , children: List Primitive
     }
 
-drawCube : State -> Primitive
+drawCube : State -> State
 drawCube state =
-    draw state buildCube
+    state |> draw buildCube
 
-draw : State -> Mesh Vertex -> Primitive
-draw state mesh =
-    { transform = Mat4.identity
-    , mesh = mesh
-    , texture = Maybe.Nothing
-    }
+draw : Mesh Vertex -> State -> State
+draw mesh (p, entities) =
+    ( p
+    , entities ++ [ toInitialEntity p.perspective mesh ]
+    )
 
 type alias Vertex =
     { position : Vec3
@@ -88,6 +87,15 @@ toEntity perspective primitive  =
         { perspective = perspective
         -- , texture = primitive.texture
         , color = vec3 1 0 1
+        }
+
+toInitialEntity : Mat4 -> Mesh Vertex -> Entity
+toInitialEntity perspective mesh =
+    toEntity
+        perspective
+        { transform = Mat4.identity
+        , mesh = mesh
+        , texture = Maybe.Nothing
         }
 
 type alias Uniforms =

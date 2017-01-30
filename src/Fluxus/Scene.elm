@@ -38,7 +38,7 @@ type alias Keys =
 
 -- type alias Renderer = (Float -> Float -> List Primitive)
 -- type alias Renderer = (State -> List Primitive)
-type alias Renderer = (State -> List Primitive)
+type alias Renderer = (State -> State)
 
 render : Float -> Float -> Scene -> List Entity
 render dt time scene =
@@ -50,8 +50,8 @@ render dt time scene =
                 (Mat4.makePerspective 45 (toFloat width / toFloat height) 0.01 100)
                 (Mat4.makeLookAt person.position (Vec3.add person.position Vec3.k) Vec3.j)
     in
-        List.concatMap (\renderer -> renderer scene.state) scene.renderers
-            |> List.map (Primitive.toEntity perspective)
+        List.concatMap (\(p, entities) -> entities)
+                       (List.map (\renderer -> renderer scene.state) scene.renderers)
 
 animate : Float -> Scene -> Scene
 animate dt scene =
