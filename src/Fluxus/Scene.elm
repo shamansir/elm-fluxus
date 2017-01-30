@@ -43,15 +43,17 @@ type alias Renderer = (State -> State)
 render : Float -> Float -> Scene -> List Entity
 render dt time scene =
     let
-        { person, size } = scene
+        { person, size, state } = scene
         { width, height } = size
+        ( p, _ ) = state
         perspective =
             Mat4.mul
                 (Mat4.makePerspective 45 (toFloat width / toFloat height) 0.01 100)
                 (Mat4.makeLookAt person.position (Vec3.add person.position Vec3.k) Vec3.j)
+        newState = ({ p | perspective = perspective }, [])
     in
         List.concatMap (\(p, entities) -> entities)
-                       (List.map (\renderer -> renderer scene.state) scene.renderers)
+                       (List.map (\renderer -> renderer newState) scene.renderers)
 
 animate : Float -> Scene -> Scene
 animate dt scene =
