@@ -18,10 +18,10 @@ type alias Primitive =
 
 drawCube : State -> Primitive
 drawCube state =
-    draw buildCube
+    draw state buildCube
 
-draw : Mesh Vertex -> Primitive
-draw mesh =
+draw : State -> Mesh Vertex -> Primitive
+draw state mesh =
     { transform = Mat4.identity
     , mesh = mesh
     , texture = Maybe.Nothing

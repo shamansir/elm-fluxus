@@ -38,8 +38,8 @@ everyFrame renderer =
 view : Model -> Html Msg
 view scene =
     let
-        { size, entities, state } = scene
-        { time } = state
+        { size, state } = scene
+        ( _, entities ) = state
     in
         div
             [ style

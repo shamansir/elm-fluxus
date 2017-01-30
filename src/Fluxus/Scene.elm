@@ -22,7 +22,6 @@ type alias Person =
 
 type alias Scene =
     { renderers: List Renderer
-    , entities: List Entity
     , person: Person
     , size: Window.Size
     , keys: Keys
@@ -58,7 +57,8 @@ animate : Float -> Scene -> Scene
 animate dt scene =
     let
         prevState = scene.state
-        newTime = prevState.time + dt
+        (p, _) = prevState
+        newTime = p.time + dt
     in
         { scene
         | person =
@@ -66,8 +66,9 @@ animate dt scene =
                 |> move scene.keys
                 |> gravity (dt / 500)
                 |> physics (dt / 500)
-        , entities = (render dt newTime scene)
-        , state = prevState |> advance dt
+        , state = prevState
+                  |> advance dt
+                  |> setEntities (render dt newTime scene)
         }
 
 eyeLevel : Float
@@ -156,7 +157,6 @@ gravity dt person =
 empty : Scene
 empty =
     { renderers = [ ]
-    , entities = [ ]
     , person = Person (vec3 0 eyeLevel -10) (vec3 0 0 0)
     , keys = Keys False False False False False
     , size = Window.Size 0 0
