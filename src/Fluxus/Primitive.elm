@@ -84,6 +84,7 @@ toEntity environment primitive  =
         fragmentShader
         primitive.mesh
         { perspective = environment.perspective
+        , transform = environment.transform
         -- , texture = primitive.texture
         , color = environment.color
         }
@@ -98,6 +99,7 @@ toInitialEntity environment mesh =
 
 type alias Uniforms =
     { color : Vec3
+    , transform: Mat4
     , perspective : Mat4
     }
 
@@ -109,10 +111,11 @@ vertexShader =
         attribute vec3 position;
         attribute vec2 coord;
         uniform mat4 perspective;
+        uniform mat4 transform;
         varying vec2 vcoord;
 
         void main () {
-          gl_Position = perspective * vec4(position, 1.0);
+          gl_Position = perspective * transform * vec4(position, 1.0);
           vcoord = coord;
         }
 
