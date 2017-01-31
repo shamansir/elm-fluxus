@@ -5,20 +5,20 @@ import Math.Matrix4 as Mat4 exposing (Mat4)
 
 import WebGL exposing (Entity)
 
+type alias Environment =
+    { color: Vec3
+    , transform: Mat4
+    , perspective: Mat4
+    , delta: Float
+    , time: Float
+    }
+
 type alias State =
-    (
-        { colour: Vec3
-        , transform: Mat4
-        , perspective: Mat4
-        , delta: Float
-        , time: Float
-        }
-    , List Entity
-    )
+    ( Environment , List Entity )
 
 init : State
 init =
-    ( { colour = (vec3 0 0 0)
+    ( { color = (vec3 0 0 0)
       , transform = Mat4.identity
       , perspective = Mat4.identity
       , delta = 0
@@ -27,42 +27,42 @@ init =
     , []
     )
 
-colour : Vec3 -> State -> State
-colour newColour ( p, entities ) =
-    ( { p | colour = newColour }
+color : Vec3 -> State -> State
+color newColor ( env, entities ) =
+    ( { env | color = newColor }
     , entities
     )
 
 rotate : Float -> Vec3 -> State -> State
-rotate angle axis ( p, entities ) =
-    ( { p | transform = p.transform |> Mat4.rotate angle axis }
+rotate angle axis ( env, entities ) =
+    ( { env | transform = env.transform |> Mat4.rotate angle axis }
     , entities
     )
 
 translate : Vec3 -> State -> State
-translate position ( p, entities ) =
-    ( { p | transform = p.transform |> Mat4.translate position }
+translate position ( env, entities ) =
+    ( { env | transform = env.transform |> Mat4.translate position }
     , entities
     )
 
 scale : Vec3 -> State -> State
-scale amount ( p, entities ) =
-    ( { p | transform = p.transform |> Mat4.scale amount  }
+scale amount ( env, entities ) =
+    ( { env | transform = env.transform |> Mat4.scale amount  }
     , entities
     )
 
 advance : Float -> State -> State
-advance dt ( p, entities ) =
-    ( { p
+advance dt ( env, entities ) =
+    ( { env
       | delta = dt
-      , time = p.time + dt }
+      , time = env.time + dt }
     , entities
     )
 
 next : Mat4 -> Float ->  State -> State
-next perspective dt ( prevP, _ ) =
-    ( { prevP | perspective = perspective }, [] ) |> advance dt
+next perspective dt ( env, _ ) =
+    ( { env | perspective = perspective }, [] ) |> advance dt
 
 setEntities : List Entity -> State -> State
-setEntities newEntities (p, entities) =
-    ( p, newEntities )
+setEntities newEntities (env, _) =
+    ( env, newEntities )

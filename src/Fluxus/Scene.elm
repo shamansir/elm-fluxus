@@ -57,8 +57,8 @@ animate : Float -> Scene -> Scene
 animate dt scene =
     let
         prevState = scene.state
-        (p, _) = prevState
-        newTime = p.time + dt
+        (env, _) = prevState
+        newTime = env.time + dt
     in
         { scene
         | person =

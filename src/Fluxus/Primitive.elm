@@ -6,11 +6,10 @@ import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 
 import WebGL exposing (Mesh, Shader, Entity)
 import Fluxus.Texture exposing (Texture)
-import Fluxus.State exposing (State)
+import Fluxus.State exposing (State, Environment)
 
 type alias Primitive =
-    { transform: Mat4
-    , mesh: Mesh Vertex
+    { mesh: Mesh Vertex
     , texture: Maybe Texture
     -- , parent: Primitive
     -- , children: List Primitive
@@ -21,9 +20,9 @@ drawCube state =
     state |> draw buildCube
 
 draw : Mesh Vertex -> State -> State
-draw mesh (p, entities) =
-    ( p
-    , entities ++ [ toInitialEntity p.perspective mesh ]
+draw mesh (env, entities) =
+    ( env
+    , entities ++ [ toInitialEntity env mesh ]
     )
 
 type alias Vertex =
@@ -78,23 +77,22 @@ square =
         , ( bottomLeft, topRight, bottomRight )
         ]
 
-toEntity : Mat4 -> Primitive -> Entity
-toEntity perspective primitive  =
+toEntity : Environment -> Primitive -> Entity
+toEntity environment primitive  =
     WebGL.entity
         vertexShader
         fragmentShader
         primitive.mesh
-        { perspective = perspective
+        { perspective = environment.perspective
         -- , texture = primitive.texture
-        , color = vec3 1 0 1
+        , color = environment.color
         }
 
-toInitialEntity : Mat4 -> Mesh Vertex -> Entity
-toInitialEntity perspective mesh =
+toInitialEntity : Environment -> Mesh Vertex -> Entity
+toInitialEntity environment mesh =
     toEntity
-        perspective
-        { transform = Mat4.identity
-        , mesh = mesh
+        environment
+        { mesh = mesh
         , texture = Maybe.Nothing
         }
 
