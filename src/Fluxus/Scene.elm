@@ -9,7 +9,6 @@ import Time exposing (Time)
 import WebGL exposing (Mesh, Shader, Entity)
 import WebGL.Texture as Texture exposing (Texture, Error)
 
-import Fluxus.Primitive as Primitive exposing (..)
 import Fluxus.State as State exposing (..)
 
 import Keyboard
@@ -45,15 +44,14 @@ render dt time scene =
     let
         { person, size, state } = scene
         { width, height } = size
-        ( p, _ ) = state
         perspective =
             Mat4.mul
                 (Mat4.makePerspective 45 (toFloat width / toFloat height) 0.01 100)
                 (Mat4.makeLookAt person.position (Vec3.add person.position Vec3.k) Vec3.j)
-        newState = ({ p | perspective = perspective }, [])
+        nextState = state |> State.next perspective dt
     in
-        List.concatMap (\(p, entities) -> entities)
-                       (List.map (\renderer -> renderer newState) scene.renderers)
+        (List.map (\renderer -> renderer nextState) scene.renderers)
+        |> List.concatMap (\(_, entities) -> entities) -- (\v -> Tuple.second v)
 
 animate : Float -> Scene -> Scene
 animate dt scene =

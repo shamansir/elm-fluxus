@@ -59,6 +59,10 @@ advance dt ( p, entities ) =
     , entities
     )
 
+next : Mat4 -> Float ->  State -> State
+next perspective dt ( prevP, _ ) =
+    ( { prevP | perspective = perspective }, [] ) |> advance dt
+
 setEntities : List Entity -> State -> State
 setEntities newEntities (p, entities) =
     ( p, newEntities )
