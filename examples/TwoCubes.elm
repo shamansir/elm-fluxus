@@ -1,10 +1,8 @@
-import Fluxus.Primitive as Primitive exposing (..)
+import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 
 import Fluxus.Program as Fx
-
 import Fluxus.State exposing (..)
-
-import Math.Vector3 as Vec3 exposing (Vec3, vec3)
+import Fluxus.Primitive as Primitive exposing (..)
 
 main : Fx.FluxusProgram
 main =
