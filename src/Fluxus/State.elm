@@ -33,8 +33,41 @@ color newColor ( env, entities ) =
     , entities
     )
 
-rotate : Float -> Vec3 -> State -> State
-rotate angle axis ( env, entities ) =
+rotate : Vec3 -> State -> State
+rotate angles (env, entities) =
+    let
+        ( angleX, angleY, angleZ ) = Vec3.toTuple angles
+    in
+        ( { env | transform = env.transform |> Mat4.rotate angleX (vec3 1 0 0)
+                                            |> Mat4.rotate angleY (vec3 0 1 0)
+                                            |> Mat4.rotate angleZ (vec3 0 0 1) }
+        , entities
+        )
+
+-- rotate : Vec3 -> State -> State
+-- rotate angles state =
+--     let
+--         ( angleX, angleY, angleZ ) = Vec3.toTuple angles
+--     in
+--         state
+--             |> rotateX angleX
+--             |> rotateY angleY
+--             |> rotateZ angleZ
+
+-- rotateX : Float -> State -> State
+-- rotateX angleX state =
+--     rotateByAxis angleX (vec3 1 0 0) state
+
+-- rotateY : Float -> State -> State
+-- rotateY angleY state =
+--     rotateByAxis angleY (vec3 0 1 0) state
+
+-- rotateZ : Float -> State -> State
+-- rotateZ angleZ state =
+--     rotateByAxis angleZ (vec3 0 0 1) state
+
+rotateByAxis : Float -> Vec3 -> State -> State
+rotateByAxis angle axis ( env, entities ) =
     ( { env | transform = env.transform |> Mat4.rotate angle axis }
     , entities
     )
