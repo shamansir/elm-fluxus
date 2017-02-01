@@ -84,6 +84,12 @@ scale amount ( env, entities ) =
     , entities
     )
 
+time : State -> Float
+time ( env, _ ) = env.time / 1000
+
+dt : State -> Float
+dt ( env, _ ) = env.delta / 1000
+
 advance : Float -> State -> State
 advance dt ( env, entities ) =
     ( { env

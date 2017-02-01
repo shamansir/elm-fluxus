@@ -10,6 +10,7 @@ drawRow count state =
         state
             -- |> color (vec3 (toFloat count / 10) 0 0)
             |> drawCube
+            |> rotate (vec3 0 0 (45 * (sin (time state))))
             |> translate (vec3 3 0 0)
             |> drawRow (count - 1)
     else
