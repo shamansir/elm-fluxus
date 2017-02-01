@@ -18,7 +18,7 @@ type alias State =
 
 init : State
 init =
-    ( { color = (vec3 0 0 0)
+    ( { color = (vec3 0.8 0.8 0.8)
       , transform = Mat4.identity
       , perspective = Mat4.identity
       , delta = 0
