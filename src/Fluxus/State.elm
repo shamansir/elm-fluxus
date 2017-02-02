@@ -108,3 +108,12 @@ next perspective dt ( env, _ ) =
 setEntities : List Entity -> State -> State
 setEntities newEntities (env, _) =
     ( env, newEntities )
+
+withState : (State -> State) -> State -> State
+withState fn outer = 
+    let 
+        inner = fn outer
+        ( innerEnv, innerEntities ) = inner
+        ( outerEnv, outerEntities ) = outer
+    in
+        ( outerEnv, innerEntities )

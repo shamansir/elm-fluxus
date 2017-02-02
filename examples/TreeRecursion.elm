@@ -6,9 +6,9 @@ import Fluxus.Primitive as Primitive exposing (..)
 
 drawRow : Int -> State -> State
 drawRow count state =
-    if (count > 0) then
+    if ((Debug.log "count" count) > 0) then
         state
-            |> translate (vec3 2 0 0)
+            |> translate (vec3 3 0 0)
             |> drawCube
             |> rotate (vec3 (10 * (sin (time state))) 0 0)
             |> withState (\state -> 
@@ -18,7 +18,7 @@ drawRow count state =
                )     
             |> withState (\state -> 
                  state
-                 |> rotate (vec3 0 25 0)
+                 |> rotate (vec3 0 -25 0)
                  |> drawRow (count - 1)
                )
     else
