@@ -26,4 +26,4 @@ drawRow count state =
 
 main : Fx.FluxusProgram
 main =
-    Fx.everyFrame (drawRow 5)
+    Fx.everyFrame (drawRow 10)
