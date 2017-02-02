@@ -18,7 +18,7 @@ type alias State =
 
 init : State
 init =
-    ( { color = (vec3 0.8 0.8 0.8)
+    ( { color = (vec3 1 1 1)
       , transform = Mat4.identity
       , perspective = Mat4.identity
       , delta = 0
@@ -38,9 +38,9 @@ rotate angles (env, entities) =
     let
         ( angleX, angleY, angleZ ) = Vec3.toTuple angles
     in
-        ( { env | transform = env.transform |> Mat4.rotate angleX (vec3 1 0 0)
-                                            |> Mat4.rotate angleY (vec3 0 1 0)
-                                            |> Mat4.rotate angleZ (vec3 0 0 1) }
+        ( { env | transform = env.transform |> Mat4.rotate (toRadians angleX) (vec3 1 0 0)
+                                            |> Mat4.rotate (toRadians angleY) (vec3 0 1 0)
+                                            |> Mat4.rotate (toRadians angleZ) (vec3 0 0 1) }
         , entities
         )
 
@@ -54,21 +54,21 @@ rotate angles (env, entities) =
 --             |> rotateY angleY
 --             |> rotateZ angleZ
 
--- rotateX : Float -> State -> State
--- rotateX angleX state =
---     rotateByAxis angleX (vec3 1 0 0) state
+rotateX : Float -> State -> State
+rotateX angleX state =
+    rotateByAxis angleX (vec3 1 0 0) state
 
--- rotateY : Float -> State -> State
--- rotateY angleY state =
---     rotateByAxis angleY (vec3 0 1 0) state
+rotateY : Float -> State -> State
+rotateY angleY state =
+    rotateByAxis angleY (vec3 0 1 0) state
 
--- rotateZ : Float -> State -> State
--- rotateZ angleZ state =
---     rotateByAxis angleZ (vec3 0 0 1) state
+rotateZ : Float -> State -> State
+rotateZ angleZ state =
+    rotateByAxis angleZ (vec3 0 0 1) state
 
 rotateByAxis : Float -> Vec3 -> State -> State
 rotateByAxis angle axis ( env, entities ) =
-    ( { env | transform = env.transform |> Mat4.rotate angle axis }
+    ( { env | transform = env.transform |> Mat4.rotate (toRadians angle) axis }
     , entities
     )
 
@@ -97,6 +97,9 @@ advance dt ( env, entities ) =
       , time = env.time + dt }
     , entities
     )
+
+toRadians : Float -> Float
+toRadians = Basics.degrees
 
 next : Mat4 -> Float ->  State -> State
 next perspective dt ( env, _ ) =
