@@ -83,11 +83,7 @@ toEntity environment primitive  =
         vertexShader
         fragmentShader
         primitive.mesh
-        { perspective = environment.perspective
-        , transform = environment.transform
-        -- , texture = primitive.texture
-        , color = environment.color
-        }
+        environment
 
 toInitialEntity : Environment -> Mesh Vertex -> Entity
 toInitialEntity environment mesh =
@@ -97,11 +93,7 @@ toInitialEntity environment mesh =
         , texture = Maybe.Nothing
         }
 
-type alias Uniforms =
-    { color : Vec3
-    , transform: Mat4
-    , perspective : Mat4
-    }
+type alias Uniforms = Environment
 
 
 vertexShader : Shader Vertex Uniforms { vcoord : Vec2 }

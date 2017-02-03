@@ -1,4 +1,12 @@
 module Fluxus.Core exposing (..)
 
-everyFrame : Int
-everyFrame = 0
+import Fluxus.State exposing (State)
+
+time : State -> Float
+time ( env, _ ) = env.time / 1000
+
+delta : State -> Float
+delta ( env, _ ) = env.delta / 1000
+
+toRadians : Float -> Float
+toRadians = Basics.degrees

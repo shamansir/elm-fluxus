@@ -84,12 +84,6 @@ scale amount ( env, entities ) =
     , entities
     )
 
-time : State -> Float
-time ( env, _ ) = env.time / 1000
-
-dt : State -> Float
-dt ( env, _ ) = env.delta / 1000
-
 advance : Float -> State -> State
 advance dt ( env, entities ) =
     ( { env
@@ -97,9 +91,6 @@ advance dt ( env, entities ) =
       , time = env.time + dt }
     , entities
     )
-
-toRadians : Float -> Float
-toRadians = Basics.degrees
 
 next : Mat4 -> Float ->  State -> State
 next perspective dt ( env, _ ) =
