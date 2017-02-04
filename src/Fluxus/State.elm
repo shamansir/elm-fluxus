@@ -3,7 +3,9 @@ module Fluxus.State exposing (..)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 
-import WebGL exposing (Entity)
+import WebGL exposing (Entity, Mesh)
+
+import Fluxus.Link exposing (Vertex)
 
 type alias Environment =
     { color: Vec3
@@ -11,6 +13,8 @@ type alias Environment =
     , perspective: Mat4
     , delta: Float
     , time: Float
+    , meshes : List (Mesh Vertex)
+    --. textures: List Texture
     }
 
 type alias State =
@@ -101,8 +105,8 @@ setEntities newEntities (env, _) =
     ( env, newEntities )
 
 withState : (State -> State) -> State -> State
-withState fn outer = 
-    let 
+withState fn outer =
+    let
         inner = fn outer
         ( innerEnv, innerEntities ) = inner
         ( outerEnv, outerEntities ) = outer
