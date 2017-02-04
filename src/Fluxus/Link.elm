@@ -1,13 +1,26 @@
 module Fluxus.Link exposing (..)
 
+import List.Extra exposing (getAt)
+
 import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector2 as Vec2 exposing (Vec2, vec2)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 
-import Fluxus.Form exposing (Form)
-import Fluxus.State exposing (Environment)
+import WebGL exposing (Entity, Mesh, Shader)
 
-type alias Uniforms = Environment
+import Fluxus.Form exposing (Form)
+
+type alias Meshes = List (Mesh Vertex)
+
+type alias Uniforms =
+    { color: Vec3
+    , transform: Mat4
+    , perspective: Mat4
+    , delta: Float
+    , time: Float
+    , meshes : Meshes
+    --. textures: List Texture
+    }
 
 type alias Vertex =
     { position : Vec3
@@ -46,18 +59,22 @@ fragmentShader =
 
     |]
 
-toEntity : Environment -> Form -> Entity
-toEntity environment primitive  =
+toEntity : Uniforms -> Form -> Entity
+toEntity uniforms form  =
     WebGL.entity
         vertexShader
         fragmentShader
-        primitive.mesh
-        environment
+        form.mesh
+        uniforms
 
-toInitialEntity : Environment -> Mesh Vertex -> Entity
-toInitialEntity environment mesh =
+toInitialEntity : Uniforms -> Mesh Vertex -> Entity
+toInitialEntity uniforms mesh =
     toEntity
-        environment
+        uniforms
         { mesh = mesh
         , texture = Maybe.Nothing
         }
+
+locateMesh : Meshes -> Int -> Maybe (Mesh Vertex)
+locateMesh meshes index =
+     getAt index meshes

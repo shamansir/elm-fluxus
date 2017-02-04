@@ -5,17 +5,9 @@ import Math.Matrix4 as Mat4 exposing (Mat4)
 
 import WebGL exposing (Entity, Mesh)
 
-import Fluxus.Link exposing (Vertex)
+import Fluxus.Link exposing (Uniforms)
 
-type alias Environment =
-    { color: Vec3
-    , transform: Mat4
-    , perspective: Mat4
-    , delta: Float
-    , time: Float
-    , meshes : List (Mesh Vertex)
-    --. textures: List Texture
-    }
+type alias Environment = Uniforms
 
 type alias State =
     ( Environment , List Entity )
