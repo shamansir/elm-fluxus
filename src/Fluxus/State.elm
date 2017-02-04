@@ -3,8 +3,9 @@ module Fluxus.State exposing (..)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 
-import WebGL exposing (Entity, Mesh)
+import WebGL exposing (Entity)
 
+import Fluxus.Core exposing (toRadians)
 import Fluxus.Link exposing (Uniforms)
 
 type alias Environment = Uniforms

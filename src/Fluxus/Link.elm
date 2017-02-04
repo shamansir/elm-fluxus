@@ -59,22 +59,32 @@ fragmentShader =
 
     |]
 
-toEntity : Uniforms -> Form -> Entity
-toEntity uniforms form  =
-    WebGL.entity
-        vertexShader
-        fragmentShader
-        form.mesh
-        uniforms
+toEntity : Uniforms -> Form -> Maybe Entity
+toEntity uniforms form =
+    case form.meshId of
+        Just meshId ->
+            let
+                locatedMesh = locateMesh uniforms.meshes meshId
+            in
+                case locatedMesh of
+                    Just mesh ->
+                        Just
+                            (WebGL.entity
+                                vertexShader
+                                fragmentShader
+                                mesh
+                                uniforms)
+                    Nothing -> Nothing
+        Nothing -> Nothing
 
-toInitialEntity : Uniforms -> Mesh Vertex -> Entity
-toInitialEntity uniforms mesh =
-    toEntity
-        uniforms
-        { mesh = mesh
-        , texture = Maybe.Nothing
-        }
+-- toInitialEntity : Uniforms -> Mesh Vertex -> Maybe Entity
+-- toInitialEntity uniforms mesh =
+--     toEntity
+--         uniforms
+--         { meshId = mesh
+--         , textureId = Maybe.Nothing
+--         }
 
 locateMesh : Meshes -> Int -> Maybe (Mesh Vertex)
 locateMesh meshes index =
-     getAt index meshes
+    getAt index meshes
