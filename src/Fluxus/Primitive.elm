@@ -7,7 +7,8 @@ import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import WebGL exposing (Mesh, Shader, Entity)
 
 import Fluxus.Texture exposing (Texture)
-import Fluxus.State exposing (State, Environment)
+import Fluxus.State exposing (State)
+import Fluxus.Link exposing (Vertex)
 
 drawCube : State -> State
 drawCube state =

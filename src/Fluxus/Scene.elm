@@ -1,5 +1,6 @@
 module Fluxus.Scene exposing (..)
 
+import Dict exposing (..)
 import AnimationFrame
 
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
@@ -10,6 +11,8 @@ import WebGL exposing (Mesh, Shader, Entity)
 import WebGL.Texture as Texture exposing (Texture, Error)
 
 import Fluxus.State as State exposing (..)
+import Fluxus.Link exposing (Vertex, Uniforms)
+import Fluxus.Form exposing (Form)
 
 import Keyboard
 import Window
@@ -25,7 +28,7 @@ type alias Scene =
     , size: Window.Size
     , keys: Keys
     , state: State
-    , meshes: Dict Int (Mesh Vertex)
+    , meshes: Meshes
     }
 
 type alias Keys =
@@ -39,6 +42,8 @@ type alias Keys =
 -- type alias Renderer = (Float -> Float -> List Primitive)
 -- type alias Renderer = (State -> List Primitive)
 type alias Renderer = (State -> State)
+
+type alias Meshes = Dict Int (Mesh Vertex)
 
 render : Float -> Float -> Scene -> List Entity
 render dt time scene =
@@ -168,17 +173,17 @@ addRenderer : Renderer -> Scene -> Scene
 addRenderer renderer scene =
     { scene | renderers = renderer :: scene.renderers }
 
-toEntity : Uniforms -> Form -> Maybe Entity
-toEntity uniforms form =
+toEntity : Meshes -> state -> Form -> Maybe Entity
+toEntity meshes state form =
     case form.meshId of
         Just meshId ->
             let
-                locatedMesh = Dict.get scene.meshes meshId
+                locatedMesh = Dict.get meshes meshId
             in
                 case locatedMesh of
                     Just mesh ->
                         Just
-                            (Link.toEntity uniforms mesh)
+                            (toEntity (toUniforms state) mesh)
                     Nothing -> Nothing
         Nothing -> Nothing
 
