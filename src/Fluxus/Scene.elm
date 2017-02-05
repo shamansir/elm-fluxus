@@ -25,6 +25,7 @@ type alias Scene =
     , size: Window.Size
     , keys: Keys
     , state: State
+    , meshes: Dict Int (Mesh Vertex)
     }
 
 type alias Keys =
@@ -166,6 +167,28 @@ empty =
 addRenderer : Renderer -> Scene -> Scene
 addRenderer renderer scene =
     { scene | renderers = renderer :: scene.renderers }
+
+toEntity : Uniforms -> Form -> Maybe Entity
+toEntity uniforms form =
+    case form.meshId of
+        Just meshId ->
+            let
+                locatedMesh = Dict.get scene.meshes meshId
+            in
+                case locatedMesh of
+                    Just mesh ->
+                        Just
+                            (Link.toEntity uniforms mesh)
+                    Nothing -> Nothing
+        Nothing -> Nothing
+
+-- toInitialEntity : Uniforms -> Mesh Vertex -> Maybe Entity
+-- toInitialEntity uniforms mesh =
+--     toEntity
+--         uniforms
+--         { meshId = mesh
+--         , textureId = Maybe.Nothing
+--         }
 
 type Msg
     = TextureLoaded (Result Error Texture)
