@@ -9,7 +9,10 @@ import Fluxus.Scene as Scene
 
 type alias Msg = Scene.Msg
 
-type alias Model = Scene.Scene
+type alias Model =
+    { scene = Scene.Scene
+    , entities = WebGL.Entity
+    }
 
 type alias FluxusProgram = Program Never Model Msg
 

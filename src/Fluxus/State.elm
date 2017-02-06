@@ -13,7 +13,7 @@ type alias State =
     , color: Vec3
     , transform: Mat4
     , perspective: Mat4
-    , forms: List Form
+    , forms: List Forms
     }
 
 init : State
@@ -74,6 +74,7 @@ scale : Vec3 -> State -> State
 scale amount state =
     { state | transform = state.transform |> Mat4.scale amount }
 
+-- should be private and `next` should be public
 advance : Float -> State -> State
 advance dt state =
     { state
@@ -109,4 +110,3 @@ toUniforms state =
     , transform = state.transform
     , perspective = state.perspective
     }
-

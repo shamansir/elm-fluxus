@@ -59,12 +59,12 @@ render dt time scene =
         (List.map (\renderer -> renderer nextState) scene.renderers)
         |> List.concatMap (\(_, entities) -> entities) -- (\v -> Tuple.second v)
 
-animate : Float -> Scene -> Scene
+animate : Float -> Scene -> ( Scene, List Entity )
 animate dt scene =
     let
         prevState = scene.state
-        (env, _) = prevState
-        newTime = env.time + dt
+        newTime = prevState.time + dt
+        nextState = prevState |> setEntities (render dt newTime scene)
     in
         { scene
         | person =
@@ -72,9 +72,7 @@ animate dt scene =
                 |> move scene.keys
                 |> gravity (dt / 500)
                 |> physics (dt / 500)
-        , state = prevState
-                  |> advance dt
-                  |> setEntities (render dt newTime scene)
+        , state =
         }
 
 eyeLevel : Float
