@@ -20,6 +20,7 @@ import Time exposing (Time)
 import WebGL exposing (Mesh, Shader, Entity)
 import WebGL.Texture as Texture exposing (Texture, Error)
 
+import Fluxus.Primitive as Primitive
 import Fluxus.State as State exposing (..)
 import Fluxus.Link exposing (Vertex, Uniforms)
 import Fluxus.Form exposing (Form)
@@ -263,3 +264,14 @@ subscriptions _ =
         , Keyboard.ups (KeyChange False)
         , Window.resizes Resize
         ]
+
+buildCube : Scene -> Int
+buildCube scene =
+    scene |> addMesh cube
+
+addMesh : Mesh Vertex -> Scene -> Int
+addMesh mesh scene =
+    let
+        lastId = Dict.size scene.meshes
+    in
+        { scene | meshes = scene.meshes |> Dict.insert lastId mesh }
