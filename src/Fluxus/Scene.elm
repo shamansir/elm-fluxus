@@ -64,7 +64,7 @@ type alias Renderer = (State -> ChangeResult)
 
 type alias Meshes = Dict Int (Mesh Vertex)
 
-animate : Float -> Scene -> Model
+animate : Float -> Scene -> ( Model, Cmd Msg )
 animate dt scene =
     let
         { person, size, state } = scene
@@ -74,22 +74,25 @@ animate dt scene =
             Mat4.mul
                 (Mat4.makePerspective 45 (toFloat width / toFloat height) 0.01 100)
                 (Mat4.makeLookAt person.position (Vec3.add person.position Vec3.k) Vec3.j)
-        newState = state |> State.next newPerspective dt
+        ( newState, command ) = state |> State.next newPerspective dt
+        newPerson = scene.person
+                |> move scene.keys
+                |> gravity (dt / 500)
+                |> physics (dt / 500)
         newEntities =
             (List.map (\renderer -> renderer newState) scene.renderers)
             |> List.concatMap (\(_, entities) -> entities)
     in
         (
-          { scene
-          | person =
-                scene.person
-                |> move scene.keys
-                |> gravity (dt / 500)
-                |> physics (dt / 500)
-          , state = newState
-          }
-       , newEntities
-       )
+            (
+              { scene
+              | person = newPerson
+              , state = newState
+              }
+            , newEntities
+            )
+        , command
+        )
 
 eyeLevel : Float
 eyeLevel =
@@ -217,7 +220,8 @@ type Msg
     | KeyChange Bool Keyboard.KeyCode
     | Animate Time
     | Resize Window.Size
-    | AddRenderer Renderer
+    -- | AddRenderer Renderer -- use this instead of the method
+    | State.Msg
 
 run : Scene -> ( Model, Cmd Msg )
 run scene =
@@ -230,7 +234,7 @@ run scene =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update action ( scene, entities ) =
-    ( ( scene, entities ),  Cmd.none )
+    ( ( scene, entities ), Cmd.none )
 
 -- update : Msg -> Model -> ( Model, Cmd Msg )
 -- update action ( scene, entities ) =
@@ -246,7 +250,7 @@ update action ( scene, entities ) =
 --             ( ( { scene | size = size }, entities ), Cmd.none )
 
 --         Animate dt ->
---             ( scene |> animate dt, Cmd.none )
+--             scene |> animate dt
 
 --         AddRenderer renderer ->
 --             (

@@ -12,6 +12,8 @@ module Fluxus.State exposing
     , toUniforms
     )
 
+import Task exposing (Task)
+
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 
@@ -20,6 +22,7 @@ import WebGL exposing (Mesh)
 import Fluxus.Core exposing (toRadians)
 import Fluxus.Link as Link exposing (Uniforms, Vertex)
 import Fluxus.Form exposing (Form)
+import Fluxus.Primitive exposing (..)
 
 -- type StateAction = Modify (State -> State) | RegisterMesh MeshId
 
@@ -42,6 +45,8 @@ init =
     , forms = []
     }
 
+type Msg = RegisterMesh (Mesh Vertex)
+
 -- applyColor : Vec3 -> State -> State
 -- applyColor newColor state =
 --     { state | color = newColor }
@@ -50,12 +55,14 @@ init =
 -- color newColor state =
 --     Modify (applyColor newColor)
 
-color : Vec3 -> State -> State
-color newColor state =
+color_ : Vec3 -> State -> State
+color_ newColor state =
     { state | color = newColor }
 
-rotate : Vec3 -> State -> State
-rotate angles state =
+color = makeStateFn color_
+
+rotate_ : Vec3 -> State -> State
+rotate_ angles state =
     let
         ( angleX, angleY, angleZ ) = Vec3.toTuple angles
     in
@@ -63,6 +70,8 @@ rotate angles state =
                                               |> Mat4.rotate (toRadians angleY) (vec3 0 1 0)
                                               |> Mat4.rotate (toRadians angleZ) (vec3 0 0 1)
         }
+
+rotate = makeStateFn rotate_
 
 -- rotate : Vec3 -> State -> State
 -- rotate angles state =
@@ -74,29 +83,43 @@ rotate angles state =
 --             |> rotateY angleY
 --             |> rotateZ angleZ
 
-rotateX : Float -> State -> State
-rotateX angleX state =
-    rotateByAxis angleX (vec3 1 0 0) state
+rotateX_ : Float -> State -> State
+rotateX_ angleX state =
+    rotateByAxis_ angleX (vec3 1 0 0) state
 
-rotateY : Float -> State -> State
-rotateY angleY state =
-    rotateByAxis angleY (vec3 0 1 0) state
+rotateY_ : Float -> State -> State
+rotateY_ angleY state =
+    rotateByAxis_ angleY (vec3 0 1 0) state
 
-rotateZ : Float -> State -> State
-rotateZ angleZ state =
-    rotateByAxis angleZ (vec3 0 0 1) state
+rotateZ_ : Float -> State -> State
+rotateZ_ angleZ state =
+    rotateByAxis_ angleZ (vec3 0 0 1) state
 
-rotateByAxis : Float -> Vec3 -> State -> State
-rotateByAxis angle axis state =
+rotateByAxis_ : Float -> Vec3 -> State -> State
+rotateByAxis_ angle axis state =
     { state | transform = state.transform |> Mat4.rotate (toRadians angle) axis }
 
-translate : Vec3 -> State -> State
-translate position state =
+rotateByAxis = makeStateFn2 rotateByAxis_
+
+translate_ : Vec3 -> State -> State
+translate_ position state =
     { state | transform = state.transform |> Mat4.translate position }
 
-scale : Vec3 -> State -> State
-scale amount state =
+translate = makeStateFn translate_
+
+scale_ : Vec3 -> State -> State
+scale_ amount state =
     { state | transform = state.transform |> Mat4.scale amount }
+
+scale = makeStateFn scale_
+
+makeStateFn : (a -> State -> State) -> a -> ( State, Cmd Msg ) -> ( State, Cmd Msg )
+makeStateFn fn param (state, cmd) =
+    ( state |> fn param, cmd )
+
+makeStateFn2 : (a -> b -> State -> State) -> a -> b -> ( State, Cmd Msg ) -> ( State, Cmd Msg )
+makeStateFn2 fn param1 param2 (state, cmd) =
+    ( state |> fn param1 param2, cmd )
 
 -- should be private and `next` should be public
 advance : Float -> State -> State
@@ -114,12 +137,12 @@ next perspective dt state =
 -- setEntities newEntities (env, _) =
 --     ( env, newEntities )
 
-withState : (State -> State) -> State -> State
+withState : ( State -> ( State, Cmd Msg ) ) -> State -> ( State, Cmd Msg )
 withState fn outer =
     let
-        inner = fn outer
+        ( inner, cmd ) = fn outer
     in
-        { outer | forms = inner.forms }
+        ( { outer | forms = inner.forms }, cmd )
 
 time : State -> Float
 time { time } = time / 1000
@@ -135,6 +158,10 @@ toUniforms state =
     , perspective = state.perspective
     }
 
+buildCube : ( State, Cmd Msg ) -> ( State, Cmd Msg )
+buildCube ( state, cmd ) =
+    ( state |> draw { meshId = Just 0, textureId = Just 0 }, Cmd.batch [ cmd, Task.perform RegisterMesh cube ] )
+
 drawCube : State -> State
 drawCube state =
     state |> draw buildCube
@@ -142,5 +169,5 @@ drawCube state =
 draw : Form -> State -> State
 draw form state =
     { state
-    | forms = state.forms ++ form
+    | forms = state.forms ++ [ form ]
     }
