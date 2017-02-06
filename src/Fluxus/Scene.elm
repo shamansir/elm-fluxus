@@ -60,7 +60,9 @@ type alias Keys =
 -- type alias Renderer = (Float -> Float -> List Primitive)
 -- type alias Renderer = (State -> List Primitive)
 -- type Renderer = Modify (State -> State) | Draw (State -> Form)
-type alias Renderer = (State -> ChangeResult)
+type alias Renderer = (State -> ( State, Cmd Msg ))
+
+-- type alias MeshId = Int
 
 type alias Meshes = Dict Int (Mesh Vertex)
 
@@ -221,7 +223,7 @@ type Msg
     | Animate Time
     | Resize Window.Size
     -- | AddRenderer Renderer -- use this instead of the method
-    | State.Msg
+    | State.RegisterMesh
 
 run : Scene -> ( Model, Cmd Msg )
 run scene =
@@ -267,6 +269,8 @@ subscriptions _ =
         , Keyboard.downs (KeyChange True)
         , Keyboard.ups (KeyChange False)
         , Window.resizes Resize
+        -- , TextureLoaded (Result Error Texture)
+        , State.meshRequests RegisterMesh
         ]
 
 buildCube : Scene -> Int
@@ -276,6 +280,9 @@ buildCube scene =
 addMesh : Mesh Vertex -> Scene -> Int
 addMesh mesh scene =
     let
+        state = scene.state
         lastId = Dict.size scene.meshes
     in
-        { scene | meshes = scene.meshes |> Dict.insert lastId mesh }
+        { scene
+        | meshes = scene.meshes |> Dict.insert lastId mesh
+        , state = { state | nextMesh = lastId + 1 }

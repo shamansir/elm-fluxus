@@ -1,5 +1,6 @@
 module Fluxus.State exposing
     ( State
+    , Msg
     , init
     , next
     , color
@@ -32,6 +33,7 @@ type alias State =
     , color: Vec3
     , transform: Mat4
     , perspective: Mat4
+    , nextMesh: Int
     , forms: List Form
     }
 
@@ -42,10 +44,11 @@ init =
     , color = (vec3 1 1 1)
     , transform = Mat4.identity
     , perspective = Mat4.identity
+    , nextMesh = 0
     , forms = []
     }
 
-type Msg = RegisterMesh (Mesh Vertex)
+type Msg = RegisterMesh Int (Mesh Vertex)
 
 -- applyColor : Vec3 -> State -> State
 -- applyColor newColor state =
@@ -160,7 +163,15 @@ toUniforms state =
 
 buildCube : ( State, Cmd Msg ) -> ( State, Cmd Msg )
 buildCube ( state, cmd ) =
-    ( state |> draw { meshId = Just 0, textureId = Just 0 }, Cmd.batch [ cmd, Task.perform RegisterMesh cube ] )
+    let
+        nextMeshId = state.nextMesh
+    in
+        ( state |> draw
+            { meshId = nextMeshId
+            , textureId = Just 0
+            }
+        , Cmd.batch [ cmd, Task.perform RegisterMesh nextMeshId cube ]
+        )
 
 drawCube : State -> State
 drawCube state =
