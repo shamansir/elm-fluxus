@@ -1,4 +1,10 @@
-module Fluxus.Scene exposing (..)
+module Fluxus.Scene exposing
+    ( Scene
+    , Renderer
+    , start
+    , update
+    , subscriptions
+    )
 
 import Dict exposing (..)
 import AnimationFrame
@@ -45,35 +51,33 @@ type alias Renderer = (State -> State)
 
 type alias Meshes = Dict Int (Mesh Vertex)
 
-render : Float -> Float -> Scene -> List Entity
-render dt time scene =
-    let
-        { person, size, state } = scene
-        { width, height } = size
-        perspective =
-            Mat4.mul
-                (Mat4.makePerspective 45 (toFloat width / toFloat height) 0.01 100)
-                (Mat4.makeLookAt person.position (Vec3.add person.position Vec3.k) Vec3.j)
-        nextState = state |> State.next perspective dt
-    in
-        (List.map (\renderer -> renderer nextState) scene.renderers)
-        |> List.concatMap (\(_, entities) -> entities) -- (\v -> Tuple.second v)
-
 animate : Float -> Scene -> ( Scene, List Entity )
 animate dt scene =
-    let
-        prevState = scene.state
-        newTime = prevState.time + dt
-        nextState = prevState |> setEntities (render dt newTime scene)
-    in
-        { scene
-        | person =
-            scene.person
-                |> move scene.keys
-                |> gravity (dt / 500)
-                |> physics (dt / 500)
-        , state =
-        }
+       ( scene, [] )
+--     let
+--         { person, size, state } = scene
+--         { width, height } = size
+--         newTime = state.time + dt
+--         newPerspective =
+--             Mat4.mul
+--                 (Mat4.makePerspective 45 (toFloat width / toFloat height) 0.01 100)
+--                 (Mat4.makeLookAt person.position (Vec3.add person.position Vec3.k) Vec3.j)
+--         newState = state |> State.next newPerspective dt
+--         newEntities =
+--             (List.map (\renderer -> renderer newState) scene.renderers)
+--             |> List.concatMap (\(_, entities) -> entities)
+--     in
+--         (
+--           { scene
+--           | person =
+--                 scene.person
+--                 |> move scene.keys
+--                 |> gravity (dt / 500)
+--                 |> physics (dt / 500)
+--           , state = newState
+--           }
+--        , newEntities
+--        )
 
 eyeLevel : Float
 eyeLevel =

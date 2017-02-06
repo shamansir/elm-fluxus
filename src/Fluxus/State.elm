@@ -1,4 +1,16 @@
-module Fluxus.State exposing (..)
+module Fluxus.State exposing
+    ( State
+    , init
+    , next
+    , color
+    , rotate
+    , translate
+    , scale
+    , withState
+    , time
+    , delta
+    , toUniforms
+    )
 
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import Math.Matrix4 as Mat4 exposing (Mat4)
@@ -13,7 +25,7 @@ type alias State =
     , color: Vec3
     , transform: Mat4
     , perspective: Mat4
-    , forms: List Forms
+    , forms: List Form
     }
 
 init : State

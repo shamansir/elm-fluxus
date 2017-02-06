@@ -24,7 +24,7 @@ run =
 runWith : Scene.Scene -> FluxusProgram
 runWith scene =
     Html.program
-        { init = Scene.start scene
+        { init = ( Scene.start scene, [] )
         , view = view
         , subscriptions = Scene.subscriptions
         , update = Scene.update
@@ -39,40 +39,36 @@ everyFrame renderer =
 -- View
 
 view : Model -> Html Msg
-view scene =
-    let
-        { size, state } = scene
-        ( _, entities ) = state
-    in
-        div
+view ( { size }, entities ) =
+    div
+        [ style
+            [ ( "width", toString size.width ++ "px" )
+            , ( "height", toString size.height ++ "px" )
+            , ( "position", "relative" )
+            ]
+        ]
+        [ WebGL.toHtmlWith
+            [ WebGL.depth 1
+            , WebGL.antialias
+            ]
+            [ width size.width
+            , height size.height
+            , style [ ( "display", "block" ) ]
+            ]
+            entities
+        , div
             [ style
-                [ ( "width", toString size.width ++ "px" )
-                , ( "height", toString size.height ++ "px" )
-                , ( "position", "relative" )
+                [ ( "position", "absolute" )
+                , ( "font-family", "monospace" )
+                , ( "color", "white" )
+                , ( "text-align", "center" )
+                , ( "left", "20px" )
+                , ( "right", "20px" )
+                , ( "top", "20px" )
                 ]
             ]
-            [ WebGL.toHtmlWith
-                [ WebGL.depth 1
-                , WebGL.antialias
-                ]
-                [ width size.width
-                , height size.height
-                , style [ ( "display", "block" ) ]
-                ]
-                entities
-            , div
-                [ style
-                    [ ( "position", "absolute" )
-                    , ( "font-family", "monospace" )
-                    , ( "color", "white" )
-                    , ( "text-align", "center" )
-                    , ( "left", "20px" )
-                    , ( "right", "20px" )
-                    , ( "top", "20px" )
-                    ]
-                ]
-                [ text message ]
-            ]
+            [ text message ]
+        ]
 
 
 message : String
