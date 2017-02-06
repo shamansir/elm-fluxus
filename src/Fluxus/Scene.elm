@@ -1,9 +1,13 @@
 module Fluxus.Scene exposing
     ( Scene
     , Renderer
-    , start
+    , Model
+    , Msg
+    , empty
+    , run
     , update
     , subscriptions
+    , addRenderer -- do not expose it
     )
 
 import Dict exposing (..)
@@ -35,6 +39,7 @@ type alias Scene =
     , keys: Keys
     , state: State
     , meshes: Meshes
+    -- textures: Textures
     }
 
 type alias Keys =
@@ -51,33 +56,32 @@ type alias Renderer = (State -> State)
 
 type alias Meshes = Dict Int (Mesh Vertex)
 
-animate : Float -> Scene -> ( Scene, List Entity )
+animate : Float -> Scene -> Model
 animate dt scene =
-       ( scene, [] )
---     let
---         { person, size, state } = scene
---         { width, height } = size
---         newTime = state.time + dt
---         newPerspective =
---             Mat4.mul
---                 (Mat4.makePerspective 45 (toFloat width / toFloat height) 0.01 100)
---                 (Mat4.makeLookAt person.position (Vec3.add person.position Vec3.k) Vec3.j)
---         newState = state |> State.next newPerspective dt
---         newEntities =
---             (List.map (\renderer -> renderer newState) scene.renderers)
---             |> List.concatMap (\(_, entities) -> entities)
---     in
---         (
---           { scene
---           | person =
---                 scene.person
---                 |> move scene.keys
---                 |> gravity (dt / 500)
---                 |> physics (dt / 500)
---           , state = newState
---           }
---        , newEntities
---        )
+    let
+        { person, size, state } = scene
+        { width, height } = size
+        newTime = state.time + dt
+        newPerspective =
+            Mat4.mul
+                (Mat4.makePerspective 45 (toFloat width / toFloat height) 0.01 100)
+                (Mat4.makeLookAt person.position (Vec3.add person.position Vec3.k) Vec3.j)
+        newState = state |> State.next newPerspective dt
+        newEntities =
+            (List.map (\renderer -> renderer newState) scene.renderers)
+            |> List.concatMap (\(_, entities) -> entities)
+    in
+        (
+          { scene
+          | person =
+                scene.person
+                |> move scene.keys
+                |> gravity (dt / 500)
+                |> physics (dt / 500)
+          , state = newState
+          }
+       , newEntities
+       )
 
 eyeLevel : Float
 eyeLevel =
@@ -169,6 +173,7 @@ empty =
     , keys = Keys False False False False False
     , size = Window.Size 0 0
     , state = State.init
+    , meshes = Dict.empty
     }
 
 addRenderer : Renderer -> Scene -> Scene
@@ -197,6 +202,8 @@ toEntity meshes state form =
 --         , textureId = Maybe.Nothing
 --         }
 
+type alias Model = ( Scene, List Entity )
+
 type Msg
     = TextureLoaded (Result Error Texture)
     | KeyChange Bool Keyboard.KeyCode
@@ -204,38 +211,40 @@ type Msg
     | Resize Window.Size
     | AddRenderer Renderer
 
-start : Scene -> ( Scene, Cmd Msg )
-start scene =
-    ( scene
+run : Scene -> ( Model, Cmd Msg )
+run scene =
+    ( ( scene, [] )
     , Cmd.batch
         [ Task.attempt TextureLoaded (Texture.load "texture/wood-crate.jpg")
         , Task.perform Resize Window.size
         ]
     )
 
-update : Msg -> Scene -> ( Scene, Cmd Msg )
-update action scene =
+update : Msg -> Model -> ( Model, Cmd Msg )
+update action ( scene, entities ) =
     case action of
         TextureLoaded textureResult ->
-            ( scene, Cmd.none )
+            ( ( scene, entities ), Cmd.none )
             -- ( { model | textures = [ Result.toMaybe textureResult ] }, Cmd.none )
 
         KeyChange on code ->
-            ( { scene | keys = keyFunc on code scene.keys }, Cmd.none )
+            ( ( { scene | keys = keyFunc on code scene.keys }, entities ), Cmd.none )
 
         Resize size ->
-            ( { scene | size = size }, Cmd.none )
+            ( ( { scene | size = size }, entities ), Cmd.none )
 
         Animate dt ->
             ( scene |> animate dt, Cmd.none )
 
         AddRenderer renderer ->
-            ( scene |> addRenderer renderer
+            (
+                ( scene |> addRenderer renderer
+                , entities
+                )
             , Cmd.none
             )
 
-
-subscriptions : Scene -> Sub Msg
+subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ AnimationFrame.diffs Animate

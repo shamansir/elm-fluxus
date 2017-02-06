@@ -9,10 +9,7 @@ import Fluxus.Scene as Scene
 
 type alias Msg = Scene.Msg
 
-type alias Model =
-    { scene = Scene.Scene
-    , entities = WebGL.Entity
-    }
+type alias Model = Scene.Model
 
 type alias FluxusProgram = Program Never Model Msg
 
@@ -20,11 +17,10 @@ run : FluxusProgram
 run =
     runWith Scene.empty
 
-
 runWith : Scene.Scene -> FluxusProgram
 runWith scene =
     Html.program
-        { init = ( Scene.start scene, [] )
+        { init = Scene.run scene
         , view = view
         , subscriptions = Scene.subscriptions
         , update = Scene.update
@@ -34,7 +30,7 @@ runWith scene =
 
 everyFrame : Scene.Renderer -> FluxusProgram
 everyFrame renderer =
-    runWith (Scene.empty |> Scene.addRenderer renderer)
+    runWith (Scene.empty |> Scene.addRenderer renderer) -- should fire a message of AddRenderer
 
 -- View
 
