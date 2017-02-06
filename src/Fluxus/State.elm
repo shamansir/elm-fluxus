@@ -15,9 +15,13 @@ module Fluxus.State exposing
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 
+import WebGL exposing (Mesh)
+
 import Fluxus.Core exposing (toRadians)
 import Fluxus.Link as Link exposing (Uniforms, Vertex)
 import Fluxus.Form exposing (Form)
+
+-- type StateAction = Modify (State -> State) | RegisterMesh MeshId
 
 type alias State =
     { time: Float
@@ -37,6 +41,14 @@ init =
     , perspective = Mat4.identity
     , forms = []
     }
+
+-- applyColor : Vec3 -> State -> State
+-- applyColor newColor state =
+--     { state | color = newColor }
+
+-- color : Vec3 -> StateAction
+-- color newColor state =
+--     Modify (applyColor newColor)
 
 color : Vec3 -> State -> State
 color newColor state =
@@ -121,4 +133,14 @@ toUniforms state =
     { color = state.color
     , transform = state.transform
     , perspective = state.perspective
+    }
+
+drawCube : State -> State
+drawCube state =
+    state |> draw buildCube
+
+draw : Form -> State -> State
+draw form state =
+    { state
+    | forms = state.forms ++ form
     }

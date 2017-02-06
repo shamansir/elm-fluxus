@@ -32,6 +32,12 @@ type alias Person =
     , velocity : Vec3
     }
 
+type alias Graph =
+    { root: Form
+    , meshes: Meshes
+    -- textures: Textures
+    }
+
 type alias Scene =
     { renderers: List Renderer
     , person: Person
@@ -52,7 +58,8 @@ type alias Keys =
 
 -- type alias Renderer = (Float -> Float -> List Primitive)
 -- type alias Renderer = (State -> List Primitive)
-type alias Renderer = (State -> State)
+-- type Renderer = Modify (State -> State) | Draw (State -> Form)
+type alias Renderer = (State -> ChangeResult)
 
 type alias Meshes = Dict Int (Mesh Vertex)
 
@@ -87,9 +94,9 @@ eyeLevel : Float
 eyeLevel =
     2
 
--- unit: Float
--- unit =
---    1
+-- -- unit: Float
+-- -- unit =
+-- --    1
 
 keyFunc : Bool -> Keyboard.KeyCode -> Keys -> Keys
 keyFunc on keyCode keys =
@@ -180,27 +187,27 @@ addRenderer : Renderer -> Scene -> Scene
 addRenderer renderer scene =
     { scene | renderers = renderer :: scene.renderers }
 
-toEntity : Meshes -> state -> Form -> Maybe Entity
-toEntity meshes state form =
-    case form.meshId of
-        Just meshId ->
-            let
-                locatedMesh = Dict.get meshes meshId
-            in
-                case locatedMesh of
-                    Just mesh ->
-                        Just
-                            (toEntity (toUniforms state) mesh)
-                    Nothing -> Nothing
-        Nothing -> Nothing
+-- toEntity : Meshes -> State -> Form -> Maybe Entity
+-- toEntity meshes state form =
+--     case form.meshId of
+--         Just meshId ->
+--             let
+--                 locatedMesh = Dict.get meshes meshId
+--             in
+--                 case locatedMesh of
+--                     Just mesh ->
+--                         Just
+--                             (toEntity (toUniforms state) mesh)
+--                     Nothing -> Nothing
+--         Nothing -> Nothing
 
--- toInitialEntity : Uniforms -> Mesh Vertex -> Maybe Entity
--- toInitialEntity uniforms mesh =
---     toEntity
---         uniforms
---         { meshId = mesh
---         , textureId = Maybe.Nothing
---         }
+-- -- toInitialEntity : Uniforms -> Mesh Vertex -> Maybe Entity
+-- -- toInitialEntity uniforms mesh =
+-- --     toEntity
+-- --         uniforms
+-- --         { meshId = mesh
+-- --         , textureId = Maybe.Nothing
+-- --         }
 
 type alias Model = ( Scene, List Entity )
 
@@ -222,27 +229,31 @@ run scene =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update action ( scene, entities ) =
-    case action of
-        TextureLoaded textureResult ->
-            ( ( scene, entities ), Cmd.none )
-            -- ( { model | textures = [ Result.toMaybe textureResult ] }, Cmd.none )
+    ( ( scene, entities ),  Cmd.none )
 
-        KeyChange on code ->
-            ( ( { scene | keys = keyFunc on code scene.keys }, entities ), Cmd.none )
+-- update : Msg -> Model -> ( Model, Cmd Msg )
+-- update action ( scene, entities ) =
+--     case action of
+--         TextureLoaded textureResult ->
+--             ( ( scene, entities ), Cmd.none )
+--             -- ( { model | textures = [ Result.toMaybe textureResult ] }, Cmd.none )
 
-        Resize size ->
-            ( ( { scene | size = size }, entities ), Cmd.none )
+--         KeyChange on code ->
+--             ( ( { scene | keys = keyFunc on code scene.keys }, entities ), Cmd.none )
 
-        Animate dt ->
-            ( scene |> animate dt, Cmd.none )
+--         Resize size ->
+--             ( ( { scene | size = size }, entities ), Cmd.none )
 
-        AddRenderer renderer ->
-            (
-                ( scene |> addRenderer renderer
-                , entities
-                )
-            , Cmd.none
-            )
+--         Animate dt ->
+--             ( scene |> animate dt, Cmd.none )
+
+--         AddRenderer renderer ->
+--             (
+--                 ( scene |> addRenderer renderer
+--                 , entities
+--                 )
+--             , Cmd.none
+--             )
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =

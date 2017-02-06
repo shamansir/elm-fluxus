@@ -8,7 +8,6 @@ import WebGL
 import Fluxus.Scene as Scene
 
 type alias Msg = Scene.Msg
-
 type alias Model = Scene.Model
 
 type alias FluxusProgram = Program Never Model Msg
