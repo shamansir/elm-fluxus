@@ -1,1 +1,0 @@
-module Fluxus.Mouse exposing (..)
