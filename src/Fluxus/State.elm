@@ -48,7 +48,7 @@ init =
     , forms = []
     }
 
-type Msg = RegisterMesh Int (Mesh Vertex)
+type Msg = RegisterMesh (Mesh Vertex) Int
 
 -- applyColor : Vec3 -> State -> State
 -- applyColor newColor state =
@@ -58,13 +58,11 @@ type Msg = RegisterMesh Int (Mesh Vertex)
 -- color newColor state =
 --     Modify (applyColor newColor)
 
-color_ : Vec3 -> State -> State
-color_ newColor state =
-    { state | color = newColor }
+color : Vec3 -> State -> ( State, Cmd Msg )
+color newColor state =
+    { state | color = newColor } ! []
 
-color = makeStateFn color_
-
-rotate_ : Vec3 -> State -> State
+rotate_ : Vec3 -> State -> ( State, Cmd Msg )
 rotate_ angles state =
     let
         ( angleX, angleY, angleZ ) = Vec3.toTuple angles
@@ -73,8 +71,7 @@ rotate_ angles state =
                                               |> Mat4.rotate (toRadians angleY) (vec3 0 1 0)
                                               |> Mat4.rotate (toRadians angleZ) (vec3 0 0 1)
         }
-
-rotate = makeStateFn rotate_
+        ! []
 
 -- rotate : Vec3 -> State -> State
 -- rotate angles state =
@@ -86,43 +83,29 @@ rotate = makeStateFn rotate_
 --             |> rotateY angleY
 --             |> rotateZ angleZ
 
-rotateX_ : Float -> State -> State
+rotateX_ : Float -> State -> ( State, Cmd Msg )
 rotateX_ angleX state =
-    rotateByAxis_ angleX (vec3 1 0 0) state
+    rotateByAxis angleX (vec3 1 0 0) state
 
-rotateY_ : Float -> State -> State
-rotateY_ angleY state =
-    rotateByAxis_ angleY (vec3 0 1 0) state
+rotateY : Float -> State -> ( State, Cmd Msg )
+rotateY angleY state =
+    rotateByAxis angleY (vec3 0 1 0) state
 
-rotateZ_ : Float -> State -> State
-rotateZ_ angleZ state =
-    rotateByAxis_ angleZ (vec3 0 0 1) state
+rotateZ : Float -> State -> ( State, Cmd Msg )
+rotateZ angleZ state =
+    rotateByAxis angleZ (vec3 0 0 1) state
 
-rotateByAxis_ : Float -> Vec3 -> State -> State
-rotateByAxis_ angle axis state =
-    { state | transform = state.transform |> Mat4.rotate (toRadians angle) axis }
+rotateByAxis : Float -> Vec3 -> State -> ( State, Cmd Msg )
+rotateByAxis angle axis state =
+    { state | transform = state.transform |> Mat4.rotate (toRadians angle) axis } ! []
 
-rotateByAxis = makeStateFn2 rotateByAxis_
+translate : Vec3 -> State -> ( State, Cmd Msg )
+translate position state =
+    { state | transform = state.transform |> Mat4.translate position } ! []
 
-translate_ : Vec3 -> State -> State
-translate_ position state =
-    { state | transform = state.transform |> Mat4.translate position }
-
-translate = makeStateFn translate_
-
-scale_ : Vec3 -> State -> State
-scale_ amount state =
-    { state | transform = state.transform |> Mat4.scale amount }
-
-scale = makeStateFn scale_
-
-makeStateFn : (a -> State -> State) -> a -> ( State, Cmd Msg ) -> ( State, Cmd Msg )
-makeStateFn fn param (state, cmd) =
-    ( state |> fn param, cmd )
-
-makeStateFn2 : (a -> b -> State -> State) -> a -> b -> ( State, Cmd Msg ) -> ( State, Cmd Msg )
-makeStateFn2 fn param1 param2 (state, cmd) =
-    ( state |> fn param1 param2, cmd )
+scale : Vec3 -> State -> ( State, Cmd Msg )
+scale amount state =
+    { state | transform = state.transform |> Mat4.scale amount } ! []
 
 -- should be private and `next` should be public
 advance : Float -> State -> State
@@ -164,13 +147,11 @@ toUniforms state =
 buildCube : ( State, Cmd Msg ) -> ( State, Cmd Msg )
 buildCube ( state, cmd ) =
     let
-        nextMeshId = state.nextMesh
+        nextMeshId = state.nextMesh + 1
     in
-        ( state |> draw
-            { meshId = nextMeshId
-            , textureId = Just 0
-            }
-        , Cmd.batch [ cmd, Task.perform RegisterMesh nextMeshId cube ]
+        (
+        { state | nextMesh = nextMeshId }
+        , Cmd.batch [ cmd, Cmd (RegisterMesh cube nextMeshId) ]
         )
 
 drawCube : State -> State
