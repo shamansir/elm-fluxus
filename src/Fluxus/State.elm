@@ -13,8 +13,6 @@ module Fluxus.State exposing
     , toUniforms
     )
 
-import Task exposing (Task)
-
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 
@@ -62,8 +60,8 @@ color : Vec3 -> State -> ( State, Cmd Msg )
 color newColor state =
     { state | color = newColor } ! []
 
-rotate_ : Vec3 -> State -> ( State, Cmd Msg )
-rotate_ angles state =
+rotate : Vec3 -> State -> ( State, Cmd Msg )
+rotate angles state =
     let
         ( angleX, angleY, angleZ ) = Vec3.toTuple angles
     in
@@ -144,14 +142,14 @@ toUniforms state =
     , perspective = state.perspective
     }
 
-buildCube : ( State, Cmd Msg ) -> ( State, Cmd Msg )
-buildCube ( state, cmd ) =
+buildCube : State -> ( State, Cmd Msg )
+buildCube state =
     let
         nextMeshId = state.nextMesh + 1
     in
         (
         { state | nextMesh = nextMeshId }
-        , Cmd.batch [ cmd, Cmd (RegisterMesh cube nextMeshId) ]
+        , Cmd RegisterMesh cube nextMeshId
         )
 
 drawCube : State -> State
