@@ -33,20 +33,12 @@ type alias Person =
     , velocity : Vec3
     }
 
-type alias Graph =
-    { root: Form
-    , meshes: Meshes
-    -- textures: Textures
-    }
-
 type alias Scene =
     { renderers: List Renderer
     , person: Person
     , size: Window.Size
     , keys: Keys
     , state: State
-    , meshes: Meshes
-    -- textures: Textures
     }
 
 type alias Keys =

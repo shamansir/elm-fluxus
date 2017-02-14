@@ -16,7 +16,7 @@ module Fluxus.State exposing
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 
-import WebGL exposing (Mesh)
+import WebGL exposing (Mesh, Texture)
 
 import Fluxus.Core as Core exposing (toRadians)
 import Fluxus.Link as Link exposing (Uniforms, Vertex)
@@ -31,8 +31,13 @@ type alias State =
     , color: Vec3
     , transform: Mat4
     , perspective: Mat4
+    , graph: Graph
+    }
+
+type alias Graph =
+    { root: Maybe Form
     , meshes: List (Mesh Vertex)
-    , forms: List Form
+    , textures: List Texture
     }
 
 init : State
@@ -42,11 +47,15 @@ init =
     , color = (vec3 1 1 1)
     , transform = Mat4.identity
     , perspective = Mat4.identity
-    , forms = []
-    , meshes = []
+    , graph = initGraph
     }
 
-type Msg = RegisterMesh (Mesh Vertex) Int
+initGraph : Graph
+initGraph =
+    { root = Maybe.Nothing
+    , meshes = []
+    , textures = []
+    }
 
 -- applyColor : Vec3 -> State -> State
 -- applyColor newColor state =
