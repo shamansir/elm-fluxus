@@ -18,10 +18,10 @@ import Math.Matrix4 as Mat4 exposing (Mat4)
 
 import WebGL exposing (Mesh)
 
-import Fluxus.Core exposing (toRadians)
+import Fluxus.Core as Core exposing (toRadians)
 import Fluxus.Link as Link exposing (Uniforms, Vertex)
-import Fluxus.Form exposing (Form)
-import Fluxus.Primitive exposing (..)
+import Fluxus.Form as Form exposing (Form)
+import Fluxus.Primitive as Primitive exposing (..)
 
 -- type StateAction = Modify (State -> State) | RegisterMesh MeshId
 
@@ -31,7 +31,7 @@ type alias State =
     , color: Vec3
     , transform: Mat4
     , perspective: Mat4
-    , nextMesh: Int
+    , meshes: List (Mesh Vertex)
     , forms: List Form
     }
 
@@ -42,8 +42,8 @@ init =
     , color = (vec3 1 1 1)
     , transform = Mat4.identity
     , perspective = Mat4.identity
-    , nextMesh = 0
     , forms = []
+    , meshes = []
     }
 
 type Msg = RegisterMesh (Mesh Vertex) Int
@@ -142,22 +142,28 @@ toUniforms state =
     , perspective = state.perspective
     }
 
-buildCube : State -> ( State, Cmd Msg )
+storeMesh : Mesh Vertex -> State -> State
+storeMesh mesh state =
+    { state | meshes = state.meshes ++ [ mesh ] }
+
+loadMesh : Int -> State -> Mesh Vertex
+loadMesh id state =
+    List.get id state.meshes
+
+buildCube : State -> State
 buildCube state =
-    let
-        nextMeshId = state.nextMesh + 1
-    in
-        (
-        { state | nextMesh = nextMeshId }
-        , Cmd RegisterMesh cube nextMeshId
-        )
+    state |> storeMesh Primitive.cube
 
 drawCube : State -> State
 drawCube state =
-    state |> draw buildCube
+    let
+      meshId = . meshes (buildCube state)
+      newForm = { meshId = Just meshId, textureId = Maybe.Nothing }
+    in
+      state |> draw buildCube
 
 draw : Form -> State -> State
 draw form state =
     { state
-    | forms = state.forms ++ [ form ]
+    | forms = state.forms ++ [ form ] -- loadForm
     }
