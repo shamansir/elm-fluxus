@@ -1,6 +1,5 @@
 module Fluxus.State exposing
     ( State
-    , Msg
     , init
     , next
     , color
@@ -64,6 +63,10 @@ initGraph =
 -- color : Vec3 -> StateAction
 -- color newColor state =
 --     Modify (applyColor newColor)
+
+-- type StateAction = Sync (State -> State) | Async (State -> (State, Cmd Msg))
+
+-- color : Vec3 -> StateAction -> State -> State
 
 color : Vec3 -> State -> ( State, Cmd Msg )
 color newColor state =
@@ -155,9 +158,9 @@ storeMesh : Mesh Vertex -> State -> State
 storeMesh mesh state =
     { state | meshes = state.meshes ++ [ mesh ] }
 
-loadMesh : Int -> State -> Mesh Vertex
-loadMesh id state =
-    List.get id state.meshes
+-- loadMesh : Int -> State -> Mesh Vertex
+-- loadMesh id state =
+--     List.get id state.meshes
 
 buildCube : State -> State
 buildCube state =
@@ -166,7 +169,7 @@ buildCube state =
 drawCube : State -> State
 drawCube state =
     let
-      meshId = . meshes (buildCube state)
+      meshId = List.length (.meshes (buildCube state))
       newForm = { meshId = Just meshId, textureId = Maybe.Nothing }
     in
       state |> draw buildCube
