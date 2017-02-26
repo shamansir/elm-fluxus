@@ -52,7 +52,7 @@ type alias Keys =
 -- type alias Renderer = (Float -> Float -> List Primitive)
 -- type alias Renderer = (State -> List Primitive)
 -- type Renderer = Modify (State -> State) | Draw (State -> Form)
-type alias Renderer = (State -> ( State, Cmd Msg ))
+type alias Renderer = (State -> (State, Cmd Msg))
 
 -- type alias MeshId = Int
 
@@ -262,19 +262,5 @@ subscriptions _ =
         , Keyboard.ups (KeyChange False)
         , Window.resizes Resize
         -- , TextureLoaded (Result Error Texture)
-        , State.meshRequests RegisterMesh
+        -- , State.meshRequests RegisterMesh
         ]
-
-buildCube : Scene -> Int
-buildCube scene =
-    scene |> addMesh cube
-
-addMesh : Mesh Vertex -> Scene -> Int
-addMesh mesh scene =
-    let
-        state = scene.state
-        lastId = Dict.size scene.meshes
-    in
-        { scene
-        | meshes = scene.meshes |> Dict.insert lastId mesh
-        , state = { state | nextMesh = lastId + 1 }

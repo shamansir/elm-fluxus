@@ -1,5 +1,6 @@
 module Fluxus.State exposing
     ( State
+    , Msg
     , init
     , next
     , color
@@ -183,7 +184,6 @@ drawCube state =
 draw : Form -> State -> State
 draw form state =
     let
-      prevGraph = state.graph
-      nextGraph = { prevGraph | forms = prevGraph.forms ++ [ form ] } -- loadForm
+      graph = state.graph
     in
-      { state | graph = nextGraph }
+      { state | graph = { graph | forms = graph.forms ++ [ form ] } }
