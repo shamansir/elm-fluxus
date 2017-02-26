@@ -24,6 +24,8 @@ import Fluxus.Primitive as Primitive exposing (..)
 
 -- type StateAction = Modify (State -> State) | RegisterMesh MeshId
 
+type Msg = LoadTexture String
+
 type alias State =
     { time: Float
     , delta: Float
@@ -34,7 +36,8 @@ type alias State =
     }
 
 type alias Graph =
-    { root: Maybe Form
+    { forms: List Form
+    -- { root: Maybe Form
     , meshes: List (Mesh Vertex)
     , textures: List Texture
     }
@@ -51,7 +54,8 @@ init =
 
 initGraph : Graph
 initGraph =
-    { root = Maybe.Nothing
+    { forms = []
+    -- { root = Maybe.Nothing
     , meshes = []
     , textures = []
     }
@@ -70,7 +74,8 @@ initGraph =
 
 color : Vec3 -> State -> ( State, Cmd Msg )
 color newColor state =
-    { state | color = newColor } ! []
+    { state | color = newColor }
+    ! []
 
 rotate : Vec3 -> State -> ( State, Cmd Msg )
 rotate angles state =
@@ -138,7 +143,7 @@ withState fn outer =
     let
         ( inner, cmd ) = fn outer
     in
-        ( { outer | forms = inner.forms }, cmd )
+        ( { outer | graph = inner.graph }, cmd )
 
 time : State -> Float
 time { time } = time / 1000
@@ -154,9 +159,9 @@ toUniforms state =
     , perspective = state.perspective
     }
 
-storeMesh : Mesh Vertex -> State -> State
-storeMesh mesh state =
-    { state | meshes = state.meshes ++ [ mesh ] }
+storeMesh : Mesh Vertex -> Graph -> Graph
+storeMesh mesh graph =
+    { graph | meshes = graph.meshes ++ [ mesh ] }
 
 -- loadMesh : Int -> State -> Mesh Vertex
 -- loadMesh id state =
@@ -164,18 +169,21 @@ storeMesh mesh state =
 
 buildCube : State -> State
 buildCube state =
-    state |> storeMesh Primitive.cube
+    { state | graph = state.graph |> storeMesh Primitive.cube }
 
 drawCube : State -> State
 drawCube state =
     let
-      meshId = List.length (.meshes (buildCube state))
+      stateWithNewMesh = (buildCube state)
+      meshId = List.length stateWithNewMesh.graph.meshes
       newForm = { meshId = Just meshId, textureId = Maybe.Nothing }
     in
-      state |> draw buildCube
+      state |> draw newForm
 
 draw : Form -> State -> State
 draw form state =
-    { state
-    | forms = state.forms ++ [ form ] -- loadForm
-    }
+    let
+      prevGraph = state.graph
+      nextGraph = { prevGraph | forms = prevGraph.forms ++ [ form ] } -- loadForm
+    in
+      { state | graph = nextGraph }
