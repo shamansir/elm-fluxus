@@ -20,10 +20,8 @@ import Time exposing (Time)
 import WebGL exposing (Mesh, Shader, Entity)
 import WebGL.Texture as Texture exposing (Texture, Error)
 
-import Fluxus.Primitive as Primitive
 import Fluxus.State as State exposing (..)
 import Fluxus.Link exposing (Vertex, Uniforms)
-import Fluxus.Form exposing (Form)
 
 import Keyboard
 import Window
@@ -52,7 +50,7 @@ type alias Keys =
 -- type alias Renderer = (Float -> Float -> List Primitive)
 -- type alias Renderer = (State -> List Primitive)
 -- type Renderer = Modify (State -> State) | Draw (State -> Form)
-type alias Renderer = (State -> (State, Cmd Msg))
+type alias Renderer = (State -> State)
 
 -- type alias MeshId = Int
 
@@ -68,7 +66,7 @@ animate dt scene =
             Mat4.mul
                 (Mat4.makePerspective 45 (toFloat width / toFloat height) 0.01 100)
                 (Mat4.makeLookAt person.position (Vec3.add person.position Vec3.k) Vec3.j)
-        ( newState, command ) = state |> State.next newPerspective dt
+        newState = state |> State.next newPerspective dt
         newPerson = scene.person
                 |> move scene.keys
                 |> gravity (dt / 500)
@@ -85,7 +83,7 @@ animate dt scene =
               }
             , newEntities
             )
-        , command
+        , Cmd.none
         )
 
 eyeLevel : Float
@@ -178,7 +176,6 @@ empty =
     , keys = Keys False False False False False
     , size = Window.Size 0 0
     , state = State.init
-    , meshes = Dict.empty
     }
 
 addRenderer : Renderer -> Scene -> Scene
@@ -214,7 +211,6 @@ type Msg
     | KeyChange Bool Keyboard.KeyCode
     | Animate Time
     | Resize Window.Size
-    -- | AddRenderer Renderer -- use this instead of the method
     | State.RegisterMesh
 
 run : Scene -> ( Model, Cmd Msg )

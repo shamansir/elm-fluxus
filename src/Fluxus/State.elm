@@ -1,6 +1,5 @@
 module Fluxus.State exposing
     ( State
-    , Msg
     , init
     , next
     , color
@@ -24,8 +23,6 @@ import Fluxus.Form as Form exposing (Form)
 import Fluxus.Primitive as Primitive exposing (..)
 
 -- type StateAction = Modify (State -> State) | RegisterMesh MeshId
-
-type Msg = LoadTexture String
 
 type alias State =
     { time: Float
@@ -73,12 +70,11 @@ initGraph =
 
 -- color : Vec3 -> StateAction -> State -> State
 
-color : Vec3 -> State -> ( State, Cmd Msg )
+color : Vec3 -> State -> State
 color newColor state =
     { state | color = newColor }
-    ! []
 
-rotate : Vec3 -> State -> ( State, Cmd Msg )
+rotate : Vec3 -> State -> State
 rotate angles state =
     let
         ( angleX, angleY, angleZ ) = Vec3.toTuple angles
@@ -87,7 +83,6 @@ rotate angles state =
                                               |> Mat4.rotate (toRadians angleY) (vec3 0 1 0)
                                               |> Mat4.rotate (toRadians angleZ) (vec3 0 0 1)
         }
-        ! []
 
 -- rotate : Vec3 -> State -> State
 -- rotate angles state =
@@ -99,29 +94,29 @@ rotate angles state =
 --             |> rotateY angleY
 --             |> rotateZ angleZ
 
-rotateX_ : Float -> State -> ( State, Cmd Msg )
-rotateX_ angleX state =
+rotateX : Float -> State -> State
+rotateX angleX state =
     rotateByAxis angleX (vec3 1 0 0) state
 
-rotateY : Float -> State -> ( State, Cmd Msg )
+rotateY : Float -> State -> State
 rotateY angleY state =
     rotateByAxis angleY (vec3 0 1 0) state
 
-rotateZ : Float -> State -> ( State, Cmd Msg )
+rotateZ : Float -> State -> State
 rotateZ angleZ state =
     rotateByAxis angleZ (vec3 0 0 1) state
 
-rotateByAxis : Float -> Vec3 -> State -> ( State, Cmd Msg )
+rotateByAxis : Float -> Vec3 -> State -> State
 rotateByAxis angle axis state =
-    { state | transform = state.transform |> Mat4.rotate (toRadians angle) axis } ! []
+    { state | transform = state.transform |> Mat4.rotate (toRadians angle) axis }
 
-translate : Vec3 -> State -> ( State, Cmd Msg )
+translate : Vec3 -> State -> State
 translate position state =
-    { state | transform = state.transform |> Mat4.translate position } ! []
+    { state | transform = state.transform |> Mat4.translate position }
 
-scale : Vec3 -> State -> ( State, Cmd Msg )
+scale : Vec3 -> State -> State
 scale amount state =
-    { state | transform = state.transform |> Mat4.scale amount } ! []
+    { state | transform = state.transform |> Mat4.scale amount }
 
 -- should be private and `next` should be public
 advance : Float -> State -> State
@@ -139,12 +134,12 @@ next perspective dt state =
 -- setEntities newEntities (env, _) =
 --     ( env, newEntities )
 
-withState : ( State -> ( State, Cmd Msg ) ) -> State -> ( State, Cmd Msg )
+withState : ( State -> State ) -> State -> State
 withState fn outer =
     let
-        ( inner, cmd ) = fn outer
+        inner = fn outer
     in
-        ( { outer | graph = inner.graph }, cmd )
+        { outer | graph = inner.graph }
 
 time : State -> Float
 time { time } = time / 1000
@@ -154,7 +149,6 @@ delta { delta } = delta / 1000
 
 toUniforms : State -> Uniforms
 toUniforms state =
-    -- state
     { color = state.color
     , transform = state.transform
     , perspective = state.perspective
