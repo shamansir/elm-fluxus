@@ -15,14 +15,14 @@ module Fluxus.State exposing
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 
-import WebGL exposing (Mesh, Texture)
+import WebGL exposing (Mesh, Texture, Entity)
 
 import Fluxus.Core as Core exposing (toRadians)
-import Fluxus.Link as Link exposing (Uniforms, Vertex)
+import Fluxus.Link as Link exposing (Uniforms, Vertex, toEntity)
 import Fluxus.Form as Form exposing (Form)
 import Fluxus.Primitive as Primitive exposing (..)
 
--- type StateAction = Modify (State -> State) | RegisterMesh MeshId
+type Action = Draw Int | Transform (Mat4 -> Mat4) | ChangeColor Vec3
 
 type alias State =
     { time: Float
@@ -70,9 +70,19 @@ initGraph =
 
 -- color : Vec3 -> StateAction -> State -> State
 
-color : Vec3 -> State -> State
-color newColor state =
-    { state | color = newColor }
+-- color : Vec3 -> State -> State
+-- color newColor state =
+--     { state | color = newColor }
+
+dispatch : Action -> State -> ( State, Maybe Entity )
+dispatch action state =
+    case action of
+        ChangeColor color -> ( { state | color = color }, Nothing )
+        Draw meshId -> ( state, Just (toEntity (state |> toUniforms) (state |> loadMesh meshId) ) )
+        Transform fn -> ( { state | transform = fn state.transform }, Nothing )
+
+color : Vec3 -> Action
+color newColor = ChangeColor newColor
 
 rotate : Vec3 -> State -> State
 rotate angles state =
@@ -158,9 +168,9 @@ storeMesh : Mesh Vertex -> Graph -> Graph
 storeMesh mesh graph =
     { graph | meshes = graph.meshes ++ [ mesh ] }
 
--- loadMesh : Int -> State -> Mesh Vertex
--- loadMesh id state =
---     List.get id state.meshes
+loadMesh : Int -> State -> Mesh Vertex
+loadMesh id state =
+    List.get id state.meshes
 
 buildCube : State -> State
 buildCube state =
