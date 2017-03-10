@@ -22,7 +22,7 @@ import Fluxus.Link as Link exposing (Uniforms, Vertex, toEntity)
 import Fluxus.Form as Form exposing (Form)
 import Fluxus.Primitive as Primitive exposing (..)
 
-type Action = Draw Int | Transform (Mat4 -> Mat4) | ChangeColor Vec3
+type Action = Draw Int | Transform (Mat4 -> Mat4) | ChangeColor Vec3 | Nest (List Action)
 
 type alias State =
     { time: Float
@@ -74,12 +74,13 @@ initGraph =
 -- color newColor state =
 --     { state | color = newColor }
 
-dispatch : Action -> State -> ( State, Maybe Entity )
+dispatch : Action -> State -> ( State, Maybe (List Entity) )
 dispatch action state =
     case action of
         ChangeColor color -> ( { state | color = color }, Nothing )
         Draw meshId -> ( state, Just (toEntity (state |> toUniforms) (state |> loadMesh meshId) ) )
         Transform fn -> ( { state | transform = fn state.transform }, Nothing )
+        Nest actions -> List.concatMap dispatch actions state
 
 color : Vec3 -> Action
 color newColor = ChangeColor newColor
