@@ -45,12 +45,12 @@ init =
     , perspective = Mat4.identity
     }
 
-dispatch : Action -> State -> ( State, Graph )
-dispatch action state =
+dispatch : Action -> ( State, Graph ) -> ( State, Graph )
+dispatch action ( state, graph ) =
     case action of
-        ChangeColor color -> ( { state | color = color }, Nothing )
-        Draw meshId -> ( state, Just (toEntity (state |> toUniforms) (state |> loadMesh meshId) ) )
-        Transform fn -> ( { state | transform = fn state.transform }, Nothing )
+        ChangeColor color -> ( { state | color = color }, graph )
+        Draw meshId -> ( state, graph |> addMesh meshId (toUniforms state) )
+        Transform fn -> ( { state | transform = fn state.transform }, graph )
         Nest actions -> List.concatMap (dispatch actions state)
 
 color : Vec3 -> Action

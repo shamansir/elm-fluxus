@@ -38,8 +38,6 @@ type alias Scene =
     , person: Person
     , size: Window.Size
     , keys: Keys
-    , state: State
-    , graph: Graph
     , resources: Resources
     }
 
@@ -179,8 +177,6 @@ empty =
     , person = Person (vec3 0 eyeLevel -10) (vec3 0 0 0)
     , keys = Keys False False False False False
     , size = Window.Size 0 0
-    , state = State.init
-    , graph = Graph.init
     , resources = Resources.init
     }
 
