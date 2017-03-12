@@ -49,9 +49,13 @@ dispatch : Action -> ( State, Graph ) -> ( State, Graph )
 dispatch action ( state, graph ) =
     case action of
         ChangeColor color -> ( { state | color = color }, graph )
-        Draw meshId -> ( state, graph |> addMesh meshId (toUniforms state) )
+        Draw meshId -> ( state, graph |> Graph.addMesh meshId (toUniforms state) )
         Transform fn -> ( { state | transform = fn state.transform }, graph )
-        Nest actions -> List.concatMap (dispatch actions state)
+        Nest actions ->
+            let
+                ( innerState, innerGraph ) = dispatch actions state
+            in
+                ( state, Graph.join graph innerGraph )
 
 color : Vec3 -> Action
 color newColor = ChangeColor newColor

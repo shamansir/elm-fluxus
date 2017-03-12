@@ -3,6 +3,8 @@ module Fluxus.Graph exposing
     , Leaf
     , init
     , addMesh
+    , attach
+    , join
     )
 
 import WebGL exposing (Entity)
@@ -30,10 +32,10 @@ init =
 
 addMesh : Int -> Uniforms -> Graph -> Graph
 addMesh id uniforms graph =
-    graph
+    graph -- FIXME: implement
 
-attach : Leaf -> List Leaf -> Graph -> Graph
-attach leaf leaves graph =
+attach : List Leaf -> Graph -> Graph
+attach leaves graph =
     case graph.cursor of
         Nothing -> case graph.root of
             Nothing -> graph -- FIXME: create empty root and attach children to it
@@ -47,3 +49,8 @@ attachToLeaf leaves leaf =
             case def.children of
                 Nothing -> Leaf { def | children = Just leaves }
                 Just children -> Leaf { def | children = Just (children ++ leaves) }
+
+join : Graph -> Graph -> Graph
+join firstGraph secondGraph =
+    -- FIXME: add the contents of second graph to cursor
+    secondGraph
