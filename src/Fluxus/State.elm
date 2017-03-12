@@ -19,10 +19,14 @@ import WebGL exposing (Mesh, Texture, Entity)
 
 import Fluxus.Core as Core exposing (toRadians)
 import Fluxus.Link as Link exposing (Uniforms, Vertex, toEntity)
-import Fluxus.Form as Form exposing (Form)
 import Fluxus.Primitive as Primitive exposing (..)
+import Fluxus.Graph as Graph exposing (..)
 
-type Action = Draw Int | Transform (Mat4 -> Mat4) | ChangeColor Vec3 | Nest (List Action)
+type alias MeshId = Int
+
+type alias TextureId = Int
+
+type Action = Draw MeshId | Transform (Mat4 -> Mat4) | ChangeColor Vec3 | Nest (List Action)
 
 type alias State =
     { time: Float
@@ -30,14 +34,6 @@ type alias State =
     , color: Vec3
     , transform: Mat4
     , perspective: Mat4
-    , graph: Graph
-    }
-
-type alias Graph =
-    { forms: List Form
-    -- { root: Maybe Form
-    , meshes: List (Mesh Vertex)
-    , textures: List Texture
     }
 
 init : State
@@ -47,23 +43,15 @@ init =
     , color = (vec3 1 1 1)
     , transform = Mat4.identity
     , perspective = Mat4.identity
-    , graph = initGraph
     }
 
-initGraph : Graph
-initGraph =
-    { forms = []
-    , meshes = []
-    , textures = []
-    }
-
-dispatch : Action -> State -> ( State, Maybe (List Entity) )
+dispatch : Action -> State -> ( State, Graph )
 dispatch action state =
     case action of
         ChangeColor color -> ( { state | color = color }, Nothing )
         Draw meshId -> ( state, Just (toEntity (state |> toUniforms) (state |> loadMesh meshId) ) )
         Transform fn -> ( { state | transform = fn state.transform }, Nothing )
-        Nest actions -> List.concatMap dispatch actions state
+        Nest actions -> List.concatMap (dispatch actions state)
 
 color : Vec3 -> Action
 color newColor = ChangeColor newColor
@@ -114,10 +102,6 @@ next : Mat4 -> Float ->  State -> State
 next perspective dt state =
     { state | perspective = perspective } |> advance dt
 
--- setEntities : List Entity -> State -> State
--- setEntities newEntities (env, _) =
---     ( env, newEntities )
-
 withState : ( State -> List Action ) -> State -> State
 withState fn outer =
     let
@@ -138,30 +122,30 @@ toUniforms state =
     , perspective = state.perspective
     }
 
-storeMesh : Mesh Vertex -> Graph -> Graph
-storeMesh mesh graph =
-    { graph | meshes = graph.meshes ++ [ mesh ] }
+-- storeMesh : Mesh Vertex -> Graph -> Graph
+-- storeMesh mesh graph =
+--     { graph | meshes = graph.meshes ++ [ mesh ] }
 
-loadMesh : Int -> State -> Mesh Vertex
-loadMesh id state =
-    List.get id state.meshes
+-- loadMesh : Int -> State -> Mesh Vertex
+-- loadMesh id state =
+--     List.get id state.meshes
 
-buildCube : State -> State
-buildCube state =
-    { state | graph = state.graph |> storeMesh Primitive.cube }
+-- buildCube : State -> State
+-- buildCube state =
+--     { state | graph = state.graph |> storeMesh Primitive.cube }
 
-drawCube : State -> State
-drawCube state =
-    let
-      stateWithNewMesh = (buildCube state)
-      meshId = List.length stateWithNewMesh.graph.meshes
-      newForm = { meshId = Just meshId, textureId = Maybe.Nothing }
-    in
-      state |> draw newForm
+-- drawCube : State -> State
+-- drawCube state =
+--     let
+--       stateWithNewMesh = (buildCube state)
+--       meshId = List.length stateWithNewMesh.graph.meshes
+--       newForm = { meshId = Just meshId, textureId = Maybe.Nothing }
+--     in
+--       state |> draw newForm
 
-draw : Form -> State -> State
-draw form state =
-    let
-      graph = state.graph
-    in
-      { state | graph = { graph | forms = graph.forms ++ [ form ] } }
+-- draw : Form -> State -> State
+-- draw form state =
+--     let
+--       graph = state.graph
+--     in
+--       { state | graph = { graph | forms = graph.forms ++ [ form ] } }

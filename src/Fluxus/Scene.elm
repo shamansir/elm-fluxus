@@ -20,8 +20,10 @@ import Time exposing (Time)
 import WebGL exposing (Mesh, Shader, Entity)
 import WebGL.Texture as Texture exposing (Texture, Error)
 
-import Fluxus.State as State exposing (..)
+import Fluxus.State exposing (..)
 import Fluxus.Link exposing (Vertex, Uniforms)
+import Fluxus.Graph exposing (..)
+import Fluxus.Resources exposing (..)
 
 import Keyboard
 import Window
@@ -37,6 +39,8 @@ type alias Scene =
     , size: Window.Size
     , keys: Keys
     , state: State
+    , graph: Graph
+    , resources: Resources
     }
 
 type alias Keys =
@@ -176,6 +180,8 @@ empty =
     , keys = Keys False False False False False
     , size = Window.Size 0 0
     , state = State.init
+    , graph = Graph.init
+    , resources = Resources.init
     }
 
 addRenderer : Renderer -> Scene -> Scene
