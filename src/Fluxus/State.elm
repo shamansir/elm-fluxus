@@ -53,26 +53,9 @@ init =
 initGraph : Graph
 initGraph =
     { forms = []
-    -- { root = Maybe.Nothing
     , meshes = []
     , textures = []
     }
-
--- applyColor : Vec3 -> State -> State
--- applyColor newColor state =
---     { state | color = newColor }
-
--- color : Vec3 -> StateAction
--- color newColor state =
---     Modify (applyColor newColor)
-
--- type StateAction = Sync (State -> State) | Async (State -> (State, Cmd Msg))
-
--- color : Vec3 -> StateAction -> State -> State
-
--- color : Vec3 -> State -> State
--- color newColor state =
---     { state | color = newColor }
 
 dispatch : Action -> State -> ( State, Maybe (List Entity) )
 dispatch action state =
@@ -85,49 +68,39 @@ dispatch action state =
 color : Vec3 -> Action
 color newColor = ChangeColor newColor
 
-rotate : Vec3 -> State -> State
-rotate angles state =
+rotate : Vec3 -> Action
+rotate angles =
     let
         ( angleX, angleY, angleZ ) = Vec3.toTuple angles
     in
-        { state | transform = state.transform |> Mat4.rotate (toRadians angleX) (vec3 1 0 0)
-                                              |> Mat4.rotate (toRadians angleY) (vec3 0 1 0)
-                                              |> Mat4.rotate (toRadians angleZ) (vec3 0 0 1)
-        }
+        Transform (\matrix -> matrix |> Mat4.rotate (toRadians angleX) (vec3 1 0 0)
+                                     |> Mat4.rotate (toRadians angleY) (vec3 0 1 0)
+                                     |> Mat4.rotate (toRadians angleZ) (vec3 0 0 1))
+-- compose rotateX with rotateY and rotateZ ?
 
--- rotate : Vec3 -> State -> State
--- rotate angles state =
---     let
---         ( angleX, angleY, angleZ ) = Vec3.toTuple angles
---     in
---         state
---             |> rotateX angleX
---             |> rotateY angleY
---             |> rotateZ angleZ
+rotateX : Float -> Action
+rotateX angleX =
+    rotateByAxis angleX (vec3 1 0 0)
 
-rotateX : Float -> State -> State
-rotateX angleX state =
-    rotateByAxis angleX (vec3 1 0 0) state
+rotateY : Float -> Action
+rotateY angleY =
+    rotateByAxis angleY (vec3 0 1 0)
 
-rotateY : Float -> State -> State
-rotateY angleY state =
-    rotateByAxis angleY (vec3 0 1 0) state
+rotateZ : Float -> Action
+rotateZ angleZ =
+    rotateByAxis angleZ (vec3 0 0 1)
 
-rotateZ : Float -> State -> State
-rotateZ angleZ state =
-    rotateByAxis angleZ (vec3 0 0 1) state
-
-rotateByAxis : Float -> Vec3 -> State -> State
+rotateByAxis : Float -> Vec3 -> Action
 rotateByAxis angle axis state =
-    { state | transform = state.transform |> Mat4.rotate (toRadians angle) axis }
+    Transform (\matrix -> matrix |> Mat4.rotate (toRadians angle) axis)
 
-translate : Vec3 -> State -> State
-translate position state =
-    { state | transform = state.transform |> Mat4.translate position }
+translate : Vec3 -> Action
+translate position =
+    Transform (\matrix -> matrix |> Mat4.translate position)
 
-scale : Vec3 -> State -> State
-scale amount state =
-    { state | transform = state.transform |> Mat4.scale amount }
+scale : Vec3 -> Action
+scale amount =
+    Transform (\matrix -> matrix |> Mat4.scale amount)
 
 -- should be private and `next` should be public
 advance : Float -> State -> State
@@ -145,7 +118,7 @@ next perspective dt state =
 -- setEntities newEntities (env, _) =
 --     ( env, newEntities )
 
-withState : ( State -> State ) -> State -> State
+withState : ( State -> List Action ) -> State -> State
 withState fn outer =
     let
         inner = fn outer
