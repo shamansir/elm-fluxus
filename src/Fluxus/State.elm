@@ -26,7 +26,12 @@ type alias MeshId = Int
 
 type alias TextureId = Int
 
-type Action = Draw MeshId | Transform (Mat4 -> Mat4) | ChangeColor Vec3 | Nest (List Action)
+type Action =
+      Draw MeshId
+    | Build (Mesh Vertex)
+    | Transform (Mat4 -> Mat4)
+    | ChangeColor Vec3
+    | Nest (List Action)
 
 type alias State =
     { time: Float
@@ -51,9 +56,10 @@ dispatch action ( state, graph ) =
         ChangeColor color -> ( { state | color = color }, graph )
         Draw meshId -> ( state, graph |> Graph.addMesh meshId (toUniforms state) )
         Transform fn -> ( { state | transform = fn state.transform }, graph )
+        Build mesh -> ( state, graph ) -- FIXME: implement
         Nest actions ->
             let
-                ( innerState, innerGraph ) = dispatch actions state
+                ( _, innerGraph ) = actions |> List.foldl dispatch ( state, graph )
             in
                 ( state, Graph.join graph innerGraph )
 
@@ -83,7 +89,7 @@ rotateZ angleZ =
     rotateByAxis angleZ (vec3 0 0 1)
 
 rotateByAxis : Float -> Vec3 -> Action
-rotateByAxis angle axis state =
+rotateByAxis angle axis =
     Transform (\matrix -> matrix |> Mat4.rotate (toRadians angle) axis)
 
 translate : Vec3 -> Action
@@ -106,12 +112,9 @@ next : Mat4 -> Float ->  State -> State
 next perspective dt state =
     { state | perspective = perspective } |> advance dt
 
-withState : ( State -> List Action ) -> State -> State
-withState fn outer =
-    let
-        inner = fn outer
-    in
-        { outer | graph = inner.graph }
+withState : List Action -> Action
+withState actions =
+    Nest actions
 
 time : State -> Float
 time { time } = time / 1000
@@ -126,6 +129,9 @@ toUniforms state =
     , perspective = state.perspective
     }
 
+cubeMeshId : Int
+cubeMeshId = 0
+
 -- storeMesh : Mesh Vertex -> Graph -> Graph
 -- storeMesh mesh graph =
 --     { graph | meshes = graph.meshes ++ [ mesh ] }
@@ -138,6 +144,10 @@ toUniforms state =
 -- buildCube state =
 --     { state | graph = state.graph |> storeMesh Primitive.cube }
 
+buildCube : Action
+buildCube =
+    Build Primitive.cube
+
 -- drawCube : State -> State
 -- drawCube state =
 --     let
@@ -146,6 +156,12 @@ toUniforms state =
 --       newForm = { meshId = Just meshId, textureId = Maybe.Nothing }
 --     in
 --       state |> draw newForm
+
+
+
+drawCube : Action
+drawCube =
+    Draw cubeMeshId
 
 -- draw : Form -> State -> State
 -- draw form state =
