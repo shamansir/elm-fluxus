@@ -54,3 +54,23 @@ join : Graph -> Graph -> Graph
 join firstGraph secondGraph =
     -- FIXME: add the contents of second graph to cursor
     secondGraph
+
+unfold : Graph -> List Entity
+unfold graph =
+    case graph.root of
+        Nothing -> []
+        Just rootLeaf -> unfoldLeaf rootLeaf
+
+unfoldLeaf : Leaf -> List Entity
+unfoldLeaf leaf =
+    case leaf of
+        Leaf def ->
+            case def.children of
+                Nothing ->
+                    case def.entity of
+                        Nothing -> [ ]
+                        Just entity -> [ entity ]
+                Just children ->
+                    case def.entity of
+                        Nothing -> children |> List.concatMap unfoldLeaf
+                        Just entity -> [ entity ] ++ (children |> List.concatMap unfoldLeaf)
