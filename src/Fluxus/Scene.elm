@@ -20,10 +20,11 @@ import Time exposing (Time)
 import WebGL exposing (Mesh, Shader, Entity)
 import WebGL.Texture as Texture exposing (Texture, Error)
 
-import Fluxus.State exposing (..)
+import Fluxus.Time as T exposing (TimePosition, advance)
+import Fluxus.State as State exposing (..)
 import Fluxus.Link exposing (Vertex, Uniforms)
 import Fluxus.Graph exposing (..)
-import Fluxus.Resources exposing (..)
+import Fluxus.Resources as Resources exposing (..)
 
 import Keyboard
 import Window
@@ -35,6 +36,7 @@ type alias Person =
 
 type alias Scene =
     { renderers: List Renderer
+    , time: TimePosition
     , person: Person
     , size: Window.Size
     , keys: Keys
@@ -52,7 +54,7 @@ type alias Keys =
 -- type alias Renderer = (Float -> Float -> List Primitive)
 -- type alias Renderer = (State -> List Primitive)
 -- type Renderer = Modify (State -> State) | Draw (State -> Form)
-type alias Renderer = (State -> State)
+type alias Renderer = (State -> Graph)
 
 -- type alias MeshId = Int
 
@@ -61,18 +63,18 @@ type alias Meshes = Dict Int (Mesh Vertex)
 animate : Float -> Scene -> ( Model, Cmd Msg )
 animate dt scene =
     let
-        { person, size, state } = scene
+        { person, size } = scene
         { width, height } = size
-        newTime = state.time + dt
+        newTime = scene.time |> advance dt
         newPerspective =
             Mat4.mul
                 (Mat4.makePerspective 45 (toFloat width / toFloat height) 0.01 100)
                 (Mat4.makeLookAt person.position (Vec3.add person.position Vec3.k) Vec3.j)
-        newState = state |> State.next newPerspective dt
         newPerson = scene.person
                 |> move scene.keys
                 |> gravity (dt / 500)
                 |> physics (dt / 500)
+        newState = State.init |> State.withPerspective newPerspective
         newEntities =
             (List.map (\renderer -> renderer newState) scene.renderers)
             |> List.concatMap (\(_, entities) -> entities)
@@ -81,7 +83,7 @@ animate dt scene =
             (
               { scene
               | person = newPerson
-              , state = newState
+              , time = newTime
               }
             , newEntities
             )
@@ -174,6 +176,7 @@ gravity dt person =
 empty : Scene
 empty =
     { renderers = [ ]
+    , time = T.init
     , person = Person (vec3 0 eyeLevel -10) (vec3 0 0 0)
     , keys = Keys False False False False False
     , size = Window.Size 0 0

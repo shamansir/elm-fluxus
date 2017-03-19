@@ -12,7 +12,7 @@ import WebGL exposing (Entity)
 import Fluxus.Link exposing (Uniforms)
 
 type Leaf =
-    Leaf { entity: Entity
+    Leaf { entity: Maybe Entity
          , meshId: Maybe Int
          , textureId: Maybe Int
          , parent: Maybe Leaf

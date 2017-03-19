@@ -1,14 +1,12 @@
 module Fluxus.State exposing
     ( State
     , init
-    , next
+    , withPerspective
     , color
     , rotate
     , translate
     , scale
     , withState
-    , time
-    , delta
     , toUniforms
     )
 
@@ -34,18 +32,14 @@ type Action =
     | Nest (List Action)
 
 type alias State =
-    { time: Float
-    , delta: Float
-    , color: Vec3
+    { color: Vec3
     , transform: Mat4
     , perspective: Mat4
     }
 
 init : State
 init =
-    { time = 0
-    , delta = 0
-    , color = (vec3 1 1 1)
+    { color = (vec3 1 1 1)
     , transform = Mat4.identity
     , perspective = Mat4.identity
     }
@@ -101,26 +95,14 @@ scale amount =
     Transform (\matrix -> matrix |> Mat4.scale amount)
 
 -- should be private and `next` should be public
-advance : Float -> State -> State
-advance dt state =
-    { state
-    | delta = dt
-    , time = state.time + dt
-    }
 
-next : Mat4 -> Float ->  State -> State
-next perspective dt state =
-    { state | perspective = perspective } |> advance dt
+withPerspective : Mat4 -> State -> State
+withPerspective perspective state =
+    { state | perspective = perspective }
 
 withState : List Action -> Action
 withState actions =
     Nest actions
-
-time : State -> Float
-time { time } = time / 1000
-
-delta : State -> Float
-delta { delta } = delta / 1000
 
 toUniforms : State -> Uniforms
 toUniforms state =
