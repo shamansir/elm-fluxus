@@ -2,6 +2,8 @@ module Fluxus.State exposing
     ( State
     , init
     , withPerspective
+    , dispatch
+    , dispatchWithGraph
     , color
     , rotate
     , translate
@@ -44,8 +46,18 @@ init =
     , perspective = Mat4.identity
     }
 
-dispatch : Action -> ( State, Graph ) -> ( State, Graph )
-dispatch action ( state, graph ) =
+dispatch : List Action -> State -> Graph
+dispatch actions state =
+    Graph.init |> dispatchWithGraph actions state
+
+dispatchWithGraph : List Action -> State -> Graph -> Graph
+dispatchWithGraph actions state graph =
+       actions
+    |> List.foldl dispatchOne ( state, graph )
+    |> Tuple.second
+
+dispatchOne : Action -> ( State, Graph ) -> ( State, Graph )
+dispatchOne action ( state, graph ) =
     case action of
         ChangeColor color -> ( { state | color = color }, graph )
         Draw meshId -> ( state, graph |> Graph.addMesh meshId (toUniforms state) )
@@ -53,7 +65,7 @@ dispatch action ( state, graph ) =
         Build mesh -> ( state, graph ) -- FIXME: implement
         Nest actions ->
             let
-                ( _, innerGraph ) = actions |> List.foldl dispatch ( state, graph )
+                innerGraph = graph |> dispatchWithGraph actions state
             in
                 ( state, Graph.join graph innerGraph )
 
