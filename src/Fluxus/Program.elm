@@ -14,12 +14,12 @@ type alias FluxusProgram = Program Never Model Msg
 
 run : FluxusProgram
 run =
-    runWith Scene.empty
+    runWith Scene.noActions Scene.empty
 
-runWith : Scene.Scene -> FluxusProgram
-runWith scene =
+runWith : Scene.Renderer -> Scene.Scene -> FluxusProgram
+runWith renderer scene =
     Html.program
-        { init = Scene.run scene
+        { init = (Scene.run renderer scene)
         , view = view
         , subscriptions = Scene.subscriptions
         , update = Scene.update
@@ -29,12 +29,12 @@ runWith scene =
 
 everyFrame : Scene.Renderer -> FluxusProgram
 everyFrame renderer =
-    runWith (Scene.empty |> Scene.addRenderer renderer) -- should fire a message of AddRenderer
+    Scene.empty |> runWith renderer
 
 -- View
 
 view : Model -> Html Msg
-view ( { size }, entities ) =
+view ( { size }, _, entities ) =
     div
         [ style
             [ ( "width", toString size.width ++ "px" )

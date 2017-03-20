@@ -2,6 +2,7 @@ module Fluxus.Graph exposing
     ( Graph
     , Leaf
     , init
+    , empty
     , addMesh
     , attach
     , join
@@ -25,11 +26,14 @@ type alias Graph =
     , cursor: Maybe Leaf
     }
 
-init : Graph
-init =
+empty : Graph
+empty =
     { root = Nothing
     , cursor = Nothing
     }
+
+init : Graph
+init = empty
 
 addMesh : Int -> Uniforms -> Graph -> Graph
 addMesh id uniforms graph =

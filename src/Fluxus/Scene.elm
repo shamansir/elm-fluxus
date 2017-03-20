@@ -7,6 +7,7 @@ module Fluxus.Scene exposing
     , run
     , update
     , subscriptions
+    , noActions
     )
 
 import Dict exposing (..)
@@ -54,6 +55,18 @@ type alias Keys =
 -- type Renderer = Modify (State -> State) | Draw (State -> Form)
 type alias Renderer = (State -> Graph)
 
+type alias Model =
+    ( Scene
+    , Renderer
+    , List Entity
+    )
+
+type Msg
+    = TextureLoaded (Result Error Texture)
+    | KeyChange Bool Keyboard.KeyCode
+    | Animate Time
+    | Resize Window.Size
+
 -- type alias MeshId = Int
 
 type alias Meshes = Dict Int (Mesh Vertex)
@@ -81,6 +94,7 @@ animate renderer dt scene =
               | person = newPerson
               , time = newTime
               }
+            , renderer
             , newEntities
             )
         , Cmd.none
@@ -200,27 +214,23 @@ empty =
 -- --         , textureId = Maybe.Nothing
 -- --         }
 
-type alias Model = ( Scene, List Entity )
 
-type Msg
-    = TextureLoaded (Result Error Texture)
-    | KeyChange Bool Keyboard.KeyCode
-    | Animate Time
-    | Resize Window.Size
-    | State.RegisterMesh
-
-run : Scene -> ( Model, Cmd Msg )
-run scene =
-    ( ( scene, [] )
+run : Renderer -> Scene -> ( Model, Cmd Msg )
+run renderer scene =
+    ( ( scene, renderer, [] )
     , Cmd.batch
         [ Task.attempt TextureLoaded (Texture.load "texture/wood-crate.jpg")
         , Task.perform Resize Window.size
         ]
     )
 
+noActions : Renderer
+noActions =
+    (\_ -> Graph.empty)
+
 update : Msg -> Model -> ( Model, Cmd Msg )
-update action ( scene, entities ) =
-    ( ( scene, entities ), Cmd.none )
+update action ( scene, renderer, entities ) =
+    ( ( scene, renderer, entities ), Cmd.none )
 
 -- update : Msg -> Model -> ( Model, Cmd Msg )
 -- update action ( scene, entities ) =
