@@ -7,7 +7,6 @@ module Fluxus.Scene exposing
     , run
     , update
     , subscriptions
-    , addRenderer -- do not expose it
     )
 
 import Dict exposing (..)
@@ -23,7 +22,7 @@ import WebGL.Texture as Texture exposing (Texture, Error)
 import Fluxus.Time as T exposing (TimePosition, advance)
 import Fluxus.State as State exposing (..)
 import Fluxus.Link exposing (Vertex, Uniforms)
-import Fluxus.Graph exposing (..)
+import Fluxus.Graph as Graph exposing (..)
 import Fluxus.Resources as Resources exposing (..)
 
 import Keyboard
@@ -35,8 +34,7 @@ type alias Person =
     }
 
 type alias Scene =
-    { renderers: List Renderer
-    , time: TimePosition
+    { time: TimePosition
     , person: Person
     , size: Window.Size
     , keys: Keys
@@ -60,8 +58,8 @@ type alias Renderer = (State -> Graph)
 
 type alias Meshes = Dict Int (Mesh Vertex)
 
-animate : Float -> Scene -> ( Model, Cmd Msg )
-animate dt scene =
+animate : Renderer -> Float -> Scene -> ( Model, Cmd Msg )
+animate renderer dt scene =
     let
         { person, size } = scene
         { width, height } = size
@@ -75,9 +73,7 @@ animate dt scene =
                 |> gravity (dt / 500)
                 |> physics (dt / 500)
         newState = State.init |> State.withPerspective newPerspective
-        newEntities =
-            (List.map (\renderer -> renderer newState) scene.renderers)
-            |> List.concatMap (\(_, entities) -> entities)
+        newEntities = (renderer newState) |> Graph.unfold
     in
         (
             (
@@ -175,17 +171,12 @@ gravity dt person =
 
 empty : Scene
 empty =
-    { renderers = [ ]
-    , time = T.init
+    { time = T.init
     , person = Person (vec3 0 eyeLevel -10) (vec3 0 0 0)
     , keys = Keys False False False False False
     , size = Window.Size 0 0
     , resources = Resources.init
     }
-
-addRenderer : Renderer -> Scene -> Scene
-addRenderer renderer scene =
-    { scene | renderers = renderer :: scene.renderers }
 
 -- toEntity : Meshes -> State -> Form -> Maybe Entity
 -- toEntity meshes state form =

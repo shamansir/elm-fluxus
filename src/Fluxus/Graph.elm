@@ -5,6 +5,7 @@ module Fluxus.Graph exposing
     , addMesh
     , attach
     , join
+    , unfold
     )
 
 import WebGL exposing (Entity)

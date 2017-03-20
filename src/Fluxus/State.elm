@@ -10,6 +10,7 @@ module Fluxus.State exposing
     , scale
     , withState
     , toUniforms
+    , (☼)
     )
 
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
@@ -38,6 +39,10 @@ type alias State =
     , transform: Mat4
     , perspective: Mat4
     }
+
+(☼) : Action -> ( State, Graph ) -> ( State, Graph )
+(☼) action context =
+    dispatchOne action context
 
 init : State
 init =
