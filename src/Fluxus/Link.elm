@@ -1,12 +1,15 @@
-module Fluxus.Link exposing (..)
+module Fluxus.Link exposing
+    ( init
+    , toEntity
+    , Vertex
+    , Uniforms
+    )
 
 import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector2 as Vec2 exposing (Vec2, vec2)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 
 import WebGL exposing (Entity, Mesh, Shader)
-
-type alias Meshes = List (Mesh Vertex)
 
 type alias Uniforms =
     { color: Vec3

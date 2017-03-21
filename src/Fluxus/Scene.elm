@@ -56,9 +56,6 @@ type alias Keys =
     , space : Bool
     }
 
--- type alias Renderer = (Float -> Float -> List Primitive)
--- type alias Renderer = (State -> List Primitive)
--- type Renderer = Modify (State -> State) | Draw (State -> Form)
 type alias Renderer = (State -> Graph)
 
 type alias Model =

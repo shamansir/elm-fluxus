@@ -1,4 +1,10 @@
-module Fluxus.Program exposing (..)
+module Fluxus.Program exposing
+    ( FluxusProgram
+    , run
+    , empty
+    , useRenderer
+    , everyFrame
+    )
 
 import Html exposing (Html, text, div)
 import Html.Attributes exposing (width, height, style)

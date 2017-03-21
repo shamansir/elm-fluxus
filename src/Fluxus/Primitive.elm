@@ -1,4 +1,6 @@
-module Fluxus.Primitive exposing (..)
+module Fluxus.Primitive exposing
+    ( cube
+    )
 
 import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector2 as Vec2 exposing (Vec2, vec2)
