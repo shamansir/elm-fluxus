@@ -13,24 +13,28 @@ type alias Model = Scene.Model
 
 type alias FluxusProgram = Program Never Model Msg
 
-run : FluxusProgram
-run =
-    runWith Scene.noActions Scene.empty
-
-runWith : Scene.Renderer -> Scene.Scene -> FluxusProgram
-runWith renderer scene =
+run : ( Scene.Model, Cmd Msg ) -> FluxusProgram
+run initialState =
     Html.program
-        { init = (Scene.run renderer scene)
+        { init = initialState
         , view = view
         , subscriptions = Scene.subscriptions
         , update = Scene.update
         }
 
+empty : FluxusProgram
+empty =
+    run Scene.runEmpty
+
+useRenderer : Scene.Renderer -> FluxusProgram
+useRenderer renderer =
+    run (Scene.runWithRenderer renderer)
+
 -- everyFrame : Renderer
 
 everyFrame : List State.Action -> FluxusProgram
 everyFrame actions =
-    Scene.empty |> runWith (Scene.dispatchingRenderer actions)
+    run (Scene.runWithActions actions)
 
 -- View
 

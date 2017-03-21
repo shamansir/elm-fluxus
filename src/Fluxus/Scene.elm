@@ -5,10 +5,15 @@ module Fluxus.Scene exposing
     , Msg
     , empty
     , run
+    , runEmpty
+    , runWithRenderer
+    , runWithGraph
+    , runWithActions
     , update
     , subscriptions
+    , renderActions
+    , renderGraph
     , noActions
-    , dispatchingRenderer
     )
 
 import Dict exposing (..)
@@ -71,10 +76,6 @@ type Msg
 -- type alias MeshId = Int
 
 type alias Meshes = Dict Int (Mesh Vertex)
-
-dispatchingRenderer : List State.Action -> Renderer
-dispatchingRenderer actions =
-    (\state -> state |> State.dispatch actions)
 
 animate : Renderer -> Float -> Scene -> ( Model, Cmd Msg )
 animate renderer dt scene =
@@ -219,7 +220,6 @@ empty =
 -- --         , textureId = Maybe.Nothing
 -- --         }
 
-
 run : Renderer -> Scene -> ( Model, Cmd Msg )
 run renderer scene =
     ( ( scene, renderer, [] )
@@ -229,13 +229,37 @@ run renderer scene =
         ]
     )
 
+runEmpty : ( Model, Cmd Msg )
+runEmpty =
+    run noActions empty
+
+runWithRenderer : Renderer -> ( Model, Cmd Msg )
+runWithRenderer renderer =
+    run renderer empty
+
+runWithGraph : Graph -> ( Model, Cmd Msg )
+runWithGraph graph =
+    runWithRenderer (renderGraph graph)
+
+runWithActions : List Action -> ( Model, Cmd Msg )
+runWithActions actions =
+    runWithRenderer (renderActions actions)
+
+renderActions : List Action -> Renderer
+renderActions actions =
+    (\state -> state |> State.dispatch actions)
+
+renderGraph : Graph -> Renderer
+renderGraph graph =
+    (\_ -> graph)
+
 noActions : Renderer
 noActions =
     (\_ -> Graph.empty)
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update action ( scene, renderer, entities ) =
-    ( ( scene, renderer, entities ), Cmd.none )
+update action model =
+    ( model, Cmd.none )
 
 -- update : Msg -> Model -> ( Model, Cmd Msg )
 -- update action ( scene, entities ) =
