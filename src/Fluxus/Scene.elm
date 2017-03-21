@@ -8,6 +8,7 @@ module Fluxus.Scene exposing
     , update
     , subscriptions
     , noActions
+    , dispatchingRenderer
     )
 
 import Dict exposing (..)
@@ -70,6 +71,10 @@ type Msg
 -- type alias MeshId = Int
 
 type alias Meshes = Dict Int (Mesh Vertex)
+
+dispatchingRenderer : List State.Action -> Renderer
+dispatchingRenderer actions =
+    (\state -> state |> State.dispatch actions)
 
 animate : Renderer -> Float -> Scene -> ( Model, Cmd Msg )
 animate renderer dt scene =

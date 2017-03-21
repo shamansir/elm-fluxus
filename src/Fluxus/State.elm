@@ -1,5 +1,6 @@
 module Fluxus.State exposing
     ( State
+    , Action
     , init
     , withPerspective
     , dispatch
@@ -9,6 +10,8 @@ module Fluxus.State exposing
     , translate
     , scale
     , withState
+    , drawCube
+    , buildCube
     , toUniforms
     , (☼)
     )
