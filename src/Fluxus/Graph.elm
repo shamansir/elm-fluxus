@@ -22,18 +22,30 @@ type Leaf =
          }
 
 type alias Graph =
-    { root : Maybe Leaf
-    , cursor: Maybe Leaf
+    { root : Leaf
+    , cursor: Leaf
     }
 
 empty : Graph
 empty =
-    { root = Nothing
-    , cursor = Nothing
-    }
+    let
+        newRoot = emptyLeaf
+    in
+        { root = newRoot
+        , cursor = newRoot
+        }
 
 init : Graph
 init = empty
+
+emptyLeaf : Leaf
+emptyLeaf = Leaf
+    { entity = Nothing
+    , meshId = Nothing
+    , textureId = Nothing
+    , parent = Nothing
+    , children = Nothing
+    }
 
 addMesh : Int -> Uniforms -> Graph -> Graph
 addMesh id uniforms graph =
@@ -41,11 +53,7 @@ addMesh id uniforms graph =
 
 attach : List Leaf -> Graph -> Graph
 attach leaves graph =
-    case graph.cursor of
-        Nothing -> case graph.root of
-            Nothing -> graph -- FIXME: create empty root and attach children to it
-            Just root -> { graph | root = Just (root |> attachToLeaf leaves) }
-        Just cursor -> { graph | cursor = Just (cursor |> attachToLeaf leaves) }
+    { graph | cursor = graph.cursor |> attachToLeaf leaves }
 
 attachToLeaf : List Leaf -> Leaf -> Leaf
 attachToLeaf leaves leaf =
@@ -62,9 +70,7 @@ join firstGraph secondGraph =
 
 flatten : Graph -> List Entity
 flatten graph =
-    case graph.root of
-        Nothing -> []
-        Just rootLeaf -> flattenLeaf rootLeaf
+    flattenLeaf graph.root
 
 flattenLeaf : Leaf -> List Entity
 flattenLeaf leaf =
