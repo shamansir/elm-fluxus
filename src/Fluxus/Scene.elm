@@ -89,7 +89,7 @@ animate renderer dt scene =
                 |> gravity (dt / 500)
                 |> physics (dt / 500)
         newState = State.init |> State.withPerspective newPerspective
-        newEntities = (renderer newState) |> Graph.unfold
+        newEntities = (renderer newState) |> Graph.flatten
     in
         (
             (
@@ -255,32 +255,20 @@ noActions =
     (\_ -> Graph.empty)
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update action model =
-    ( model, Cmd.none )
+update action ( scene, renderer, entities ) =
+    case action of
+        TextureLoaded textureResult ->
+            ( ( scene, renderer,  entities ), Cmd.none )
+            -- ( { model | textures = [ Result.toMaybe textureResult ] }, Cmd.none )
 
--- update : Msg -> Model -> ( Model, Cmd Msg )
--- update action ( scene, entities ) =
---     case action of
---         TextureLoaded textureResult ->
---             ( ( scene, entities ), Cmd.none )
---             -- ( { model | textures = [ Result.toMaybe textureResult ] }, Cmd.none )
+        KeyChange on code ->
+            ( ( { scene | keys = keyFunc on code scene.keys }, renderer, entities ), Cmd.none )
 
---         KeyChange on code ->
---             ( ( { scene | keys = keyFunc on code scene.keys }, entities ), Cmd.none )
+        Resize size ->
+            ( ( { scene | size = size }, renderer, entities ), Cmd.none )
 
---         Resize size ->
---             ( ( { scene | size = size }, entities ), Cmd.none )
-
---         Animate dt ->
---             scene |> animate dt
-
---         AddRenderer renderer ->
---             (
---                 ( scene |> addRenderer renderer
---                 , entities
---                 )
---             , Cmd.none
---             )
+        Animate dt ->
+            scene |> animate renderer dt
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =

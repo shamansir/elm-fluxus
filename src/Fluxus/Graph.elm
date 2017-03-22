@@ -6,7 +6,7 @@ module Fluxus.Graph exposing
     , addMesh
     , attach
     , join
-    , unfold
+    , flatten
     )
 
 import WebGL exposing (Entity)
@@ -60,14 +60,14 @@ join firstGraph secondGraph =
     -- FIXME: add the contents of second graph to cursor
     secondGraph
 
-unfold : Graph -> List Entity
-unfold graph =
+flatten : Graph -> List Entity
+flatten graph =
     case graph.root of
         Nothing -> []
-        Just rootLeaf -> unfoldLeaf rootLeaf
+        Just rootLeaf -> flattenLeaf rootLeaf
 
-unfoldLeaf : Leaf -> List Entity
-unfoldLeaf leaf =
+flattenLeaf : Leaf -> List Entity
+flattenLeaf leaf =
     case leaf of
         Leaf def ->
             case def.children of
@@ -77,5 +77,5 @@ unfoldLeaf leaf =
                         Just entity -> [ entity ]
                 Just children ->
                     case def.entity of
-                        Nothing -> children |> List.concatMap unfoldLeaf
-                        Just entity -> [ entity ] ++ (children |> List.concatMap unfoldLeaf)
+                        Nothing -> children |> List.concatMap flattenLeaf
+                        Just entity -> [ entity ] ++ (children |> List.concatMap flattenLeaf)
