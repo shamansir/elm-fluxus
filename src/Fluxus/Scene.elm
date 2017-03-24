@@ -56,7 +56,7 @@ type alias Keys =
     , space : Bool
     }
 
-type alias Renderer = (State -> Graph)
+type alias Renderer = ((State, Scene) -> Graph)
 
 type alias Model =
     ( Scene
@@ -89,7 +89,7 @@ animate renderer dt scene =
                 |> gravity (dt / 500)
                 |> physics (dt / 500)
         newState = State.init |> State.withPerspective newPerspective
-        newEntities = (renderer newState) |> Graph.flatten
+        newEntities = renderer (newState, scene) |> Graph.flatten
     in
         (
             (
@@ -244,7 +244,7 @@ runWithActions actions =
 
 renderActions : List Action -> Renderer
 renderActions actions =
-    (\state -> state |> State.dispatch actions)
+    (\(state, _) -> state |> State.dispatch actions)
 
 renderGraph : Graph -> Renderer
 renderGraph graph =
