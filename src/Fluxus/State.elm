@@ -25,6 +25,7 @@ import Fluxus.Core as Core exposing (toRadians)
 import Fluxus.Link as Link exposing (Uniforms, Vertex, toEntity)
 import Fluxus.Primitive as Primitive exposing (..)
 import Fluxus.Graph as Graph exposing (..)
+import Fluxus.Resources as Resources exposing (..)
 
 type alias MeshId = Int
 
@@ -54,18 +55,18 @@ init =
     , perspective = Mat4.identity
     }
 
-dispatch : List Action -> State -> Graph
-dispatch actions state =
-    Graph.init |> dispatchWithGraph actions state
+dispatch : List Action -> Resources -> State -> Graph
+dispatch actions resources state =
+    Graph.init |> dispatchWithGraph actions resources state
 
-dispatchWithGraph : List Action -> State -> Graph -> Graph
-dispatchWithGraph actions state graph =
+dispatchWithGraph : List Action -> Resources -> State -> Graph -> Graph
+dispatchWithGraph actions resources state graph =
        actions
-    |> List.foldl dispatchOne ( state, graph )
+    |> List.foldl dispatchOne resources ( state, graph )
     |> Tuple.second
 
-dispatchOne : Action -> ( State, Graph ) -> ( State, Graph )
-dispatchOne action ( state, graph ) =
+dispatchOne : Action -> Resources -> ( State, Graph ) -> ( State, Graph )
+dispatchOne action resources ( state, graph ) =
     case action of
         ChangeColor color -> ( { state | color = color }, graph )
         Draw meshId -> ( state, graph |> Graph.addMesh meshId (toUniforms state) )
@@ -73,7 +74,7 @@ dispatchOne action ( state, graph ) =
         Build mesh -> ( state, graph ) -- FIXME: implement
         Nest actions ->
             let
-                innerGraph = graph |> dispatchWithGraph actions state
+                innerGraph = graph |> dispatchWithGraph actions resources state
             in
                 ( state, Graph.join graph innerGraph )
 

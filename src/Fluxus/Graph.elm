@@ -12,6 +12,7 @@ module Fluxus.Graph exposing
 import WebGL exposing (Entity)
 
 import Fluxus.Link exposing (Uniforms)
+import Fluxus.Resources exposing (Resources)
 
 type Leaf =
     Leaf { entity: Maybe Entity
@@ -47,8 +48,8 @@ emptyLeaf = Leaf
     , children = Nothing
     }
 
-addMesh : Int -> Uniforms -> Graph -> Graph
-addMesh id uniforms graph =
+addMesh : Int -> Uniforms -> Graph -> Resources -> Graph
+addMesh id uniforms graph resources =
     graph -- FIXME: implement
 
 attach : List Leaf -> Graph -> Graph
