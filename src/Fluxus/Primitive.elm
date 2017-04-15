@@ -1,5 +1,6 @@
 module Fluxus.Primitive exposing
     ( cube
+    , PrimitiveKind
     )
 
 import Math.Matrix4 as Mat4 exposing (Mat4)
@@ -9,6 +10,8 @@ import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import WebGL exposing (Mesh)
 
 import Fluxus.Link exposing (Vertex)
+
+type PrimitiveKind = Sphere | Cube | AMesh (Mesh Vertex)
 
 cube : Mesh Vertex
 cube =

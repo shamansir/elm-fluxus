@@ -9,10 +9,9 @@ module Fluxus.Graph exposing
     , flatten
     )
 
-import WebGL exposing (Entity)
+import WebGL exposing (Entity, Mesh)
 
-import Fluxus.Link exposing (Uniforms)
-import Fluxus.Resources exposing (Resources)
+import Fluxus.Link exposing (Uniforms, Vertex)
 
 type Leaf =
     Leaf { entity: Maybe Entity
@@ -48,8 +47,8 @@ emptyLeaf = Leaf
     , children = Nothing
     }
 
-addMesh : Int -> Uniforms -> Graph -> Resources -> Graph
-addMesh id uniforms graph resources =
+addMesh : Uniforms -> Mesh Vertex -> Graph -> Graph
+addMesh uniforms mesh graph  =
     graph -- FIXME: implement
 
 attach : List Leaf -> Graph -> Graph
