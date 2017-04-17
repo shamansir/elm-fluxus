@@ -1,5 +1,6 @@
 module Fluxus.Primitive exposing
     ( cube
+    , toMesh
     , PrimitiveKind
     )
 
@@ -11,10 +12,20 @@ import WebGL exposing (Mesh)
 
 import Fluxus.Link exposing (Vertex)
 
-type PrimitiveKind = Sphere | Cube | AMesh (Mesh Vertex)
+type PrimitiveKind = Sphere | Cube | Custom (Mesh Vertex)
 
-cube : Mesh Vertex
-cube =
+toMesh : PrimitiveKind -> Mesh Vertex
+toMesh primitiveKind =
+    case primitiveKind of
+        Sphere -> cubeMesh -- FIXME
+        Cube -> cubeMesh
+        Custom mesh -> mesh
+
+cube : PrimitiveKind
+cube = Cube
+
+cubeMesh : Mesh Vertex
+cubeMesh =
     [ ( 0, 0 ), ( 90, 0 ), ( 180, 0 ), ( 270, 0 ), ( 0, 90 ), ( 0, -90 ) ]
         |> List.concatMap rotatedSquare
         |> WebGL.triangles

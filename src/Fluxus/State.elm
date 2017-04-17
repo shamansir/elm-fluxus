@@ -68,7 +68,7 @@ dispatchOne action ( state, graph ) =
         ChangeColor color -> ( { state | color = color }, graph )
         Draw mesh -> ( state, graph |> Graph.addMesh (toUniforms state) mesh )
         Transform fn -> ( { state | transform = fn state.transform }, graph )
-        Build mesh -> ( state, graph ) -- FIXME: implement
+        Build primitiveKind -> ( state, graph ) -- FIXME: implement
         Nest actions ->
             let
                 innerGraph = graph |> dispatchWithGraph actions state
@@ -161,7 +161,7 @@ buildCube =
 
 drawCube : Action
 drawCube =
-    Draw cubeMeshId
+    Draw (Primitive.cube |> Primitive.toMesh)
 
 -- draw : Form -> State -> State
 -- draw form state =
