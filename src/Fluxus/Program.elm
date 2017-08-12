@@ -12,6 +12,7 @@ import Html.Attributes exposing (width, height, style)
 import WebGL
 
 import Fluxus.Scene as Scene
+import Fluxus.Action as Action exposing (..)
 import Fluxus.State as State exposing (..)
 
 type alias Msg = Scene.Msg
@@ -38,7 +39,7 @@ useRenderer renderer =
 
 -- everyFrame : Renderer
 
-everyFrame : List State.Action -> FluxusProgram
+everyFrame : List Action -> FluxusProgram
 everyFrame actions =
     run (Scene.runWithActions actions)
 

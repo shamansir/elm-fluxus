@@ -27,6 +27,7 @@ import WebGL exposing (Mesh, Shader, Entity)
 import WebGL.Texture as Texture exposing (Texture, Error)
 
 import Fluxus.Time as T exposing (TimePosition, advance)
+import Fluxus.Action as Action exposing (..)
 import Fluxus.State as State exposing (..)
 import Fluxus.Link exposing (Vertex, Uniforms)
 import Fluxus.Graph as Graph exposing (..)
