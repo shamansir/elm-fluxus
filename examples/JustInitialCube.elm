@@ -1,7 +1,7 @@
 import Fluxus.Program as Fx
-import Fluxus.Primitive exposing (..)
+import Fluxus.Action exposing (..)
 
 main : Fx.FluxusProgram
 main =
     Fx.everyFrame
-        (\state -> state |> drawCube )
+        [ drawCube ]
