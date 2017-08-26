@@ -11,7 +11,7 @@ module Fluxus.State exposing
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 
-import WebGL exposing (Entity, entity)
+import WebGL exposing (Entity, Mesh, Texture, entity)
 
 import Fluxus.Link as Link exposing (Uniforms, Vertex, toEntity)
 import Fluxus.Graph as Graph exposing (..)
@@ -78,18 +78,48 @@ withPerspective perspective state =
 
 -- type EntityConversionError = MeshNotFound Int | TextureNotFound Int
 
+noTexture : Texture
+noTexture = Nothing
+
+toEntityF : Maybe Mesh -> Maybe Texture -> State -> Maybe Entity
+toEntityF maybeMesh maybeTexture state =
+    case ( maybeMesh, maybeTexture ) of
+        ( Just mesh, Nothing ) ->
+            Just (WebGL.entity
+                Link.vertexShader
+                Link.fragmentShader
+                mesh
+                { texture = noTexture
+                , perspective = state.perspective
+                }
+            )
+        ( Just mesh, Just texture ) ->
+            Just (WebGL.entity
+                Link.vertexShader
+                Link.fragmentShader
+                mesh
+                { texture = texture
+                , perspective = state.perspective
+                }
+            )
+        _ -> Nothing
+
 toEntity : Instance -> Resources -> State -> Maybe Entity
 toEntity instance resources state =
-    let
-        texture = resources |> Resources.findTexture instance.texture
-        mesh = resources |> Resources.findMesh instance.mesh
-    in
-        Just (
-            WebGL.entity
-            Link.vertexShader
-            Link.fragmentShader
-            mesh
-            { texture = texture
-            , perspective = state.perspective
-            }
-        )
+    case instance of
+        Solid meshId ->
+            let
+                maybeMesh = resources |> Resources.findMesh instance.mesh
+            in
+                toEntityF maybeMesh Nothing state
+        Textured meshId textureId ->
+            let
+                maybeMesh = resources |> Resources.findMesh instance.mesh
+                maybeTexture = resources |> Resources.findTexture instance.texture
+            in
+                toEntityF maybeMesh maybeTexture state
+        Colored meshId _ ->
+            let
+                maybeMesh = resources |> Resources.findMesh instance.mesh
+            in
+                toEntityF maybeMesh Nothing state

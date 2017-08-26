@@ -1,7 +1,7 @@
 module Fluxus.Graph exposing
     ( Graph
     , Leaf
-    , Instance
+    , Instance(..)
     , init
     , empty
     , join
@@ -60,6 +60,10 @@ addMesh uniforms mesh graph  =
      -- We need State here (it has Uniforms for Entity creation),
      -- if we want to create Entity here (may be we don't need it here, but in State?)
      -- But if we use it, we have a recursive dependency
+     -- ...actually, State is the external thing, for the Node we just need
+     -- MeshId, TextureId and the first variant of Entity
+
+-- traverse a : Graph -> (Node -> a) -> List a
 
 -- attach : List Leaf -> Graph -> Graph
 -- attach leaves graph =
