@@ -6,10 +6,12 @@ module Fluxus.Resources exposing
 import WebGL exposing (Mesh, Texture)
 
 type alias Resources =
-    { textures: List Texture
+    { meshes: List Mesh
+    , textures: List Texture
     }
 
 init : Resources
 init =
-    { textures = []
+    { meshes = []
+    , textures = []
     }

@@ -11,11 +11,24 @@ module Fluxus.Graph exposing
 import Dict exposing (..)
 
 import WebGL exposing (Entity, Mesh)
+import Math.Vector3 as Vec3 exposing (Vec3)
 
 import Fluxus.Texture exposing (..)
 import Fluxus.Link exposing (Uniforms, Vertex)
 
 type alias NodeId = Int
+type alias MeshId = Int
+
+type alias Geometry = MeshId
+
+type Instance = Solid Geometry | Textured Geometry TextureId | Colored Geometry Vec3
+
+type Invalidate = None | All | Some (List NodeId)
+
+type alias NodeData =
+    { instance: Instance
+    , entity: Entity
+    }
 
 type Leaf =
     Leaf { node: NodeId
@@ -24,8 +37,9 @@ type Leaf =
          }
 
 type alias Graph =
-    { nodes : Dict NodeId ( Mesh, TextureId, Entity )
+    { nodes : Dict NodeId NodeData
     , root : Maybe Leaf
+    , invalidate: Invalidate
     -- , cursor: Maybe Leaf
     }
 
@@ -33,6 +47,7 @@ empty : Graph
 empty =
     { nodes = Dict.empty
     , root = Nothing
+    , invalidate = None
     }
 
 init : Graph
@@ -83,7 +98,7 @@ flattenLeaf graph leaf =
             case graph.nodes |> Dict.get def.node of
                 Just node ->
                     let
-                        ( _, _, entity ) = node
+                        { entity } = node
                     in
                         [ entity ] ++ (def.children |> flattenLeaves graph)
                 Nothing -> []
