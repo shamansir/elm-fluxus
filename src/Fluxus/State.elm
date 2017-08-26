@@ -11,9 +11,12 @@ module Fluxus.State exposing
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 
+import WebGL exposing (Entity, entity)
+
 import Fluxus.Link as Link exposing (Uniforms, Vertex, toEntity)
 import Fluxus.Graph as Graph exposing (..)
 import Fluxus.Action exposing (..)
+import Fluxus.Resources as Resources exposing (..)
 
 type alias TextureId = Int
 
@@ -72,3 +75,21 @@ cubeMeshId = 0
 withPerspective : Mat4 -> State -> State
 withPerspective perspective state =
     { state | perspective = perspective }
+
+-- type EntityConversionError = MeshNotFound Int | TextureNotFound Int
+
+toEntity : Instance -> Resources -> State -> Maybe Entity
+toEntity instance resources state =
+    let
+        texture = resources |> Resources.findTexture instance.texture
+        mesh = resources |> Resources.findMesh instance.mesh
+    in
+        Just (
+            WebGL.entity
+            Link.vertexShader
+            Link.fragmentShader
+            mesh
+            { texture = texture
+            , perspective = state.perspective
+            }
+        )

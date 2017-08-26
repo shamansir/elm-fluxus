@@ -1,6 +1,7 @@
 module Fluxus.Graph exposing
     ( Graph
     , Leaf
+    , Instance
     , init
     , empty
     , join
@@ -13,11 +14,11 @@ import Dict exposing (..)
 import WebGL exposing (Entity, Mesh)
 import Math.Vector3 as Vec3 exposing (Vec3)
 
-import Fluxus.Texture exposing (..)
-import Fluxus.Link exposing (Uniforms, Vertex)
+import Fluxus.Link exposing (Uniforms, Vertex, vertexShader, fragmentShader)
 
 type alias NodeId = Int
 type alias MeshId = Int
+type alias TextureId = Int
 
 type alias Geometry = MeshId
 
@@ -25,7 +26,7 @@ type Instance = Solid Geometry | Textured Geometry TextureId | Colored Geometry 
 
 type Invalidate = None | All | Some (List NodeId)
 
-type alias NodeData =
+type alias Node =
     { instance: Instance
     , entity: Entity
     }
@@ -37,7 +38,7 @@ type Leaf =
          }
 
 type alias Graph =
-    { nodes : Dict NodeId NodeData
+    { nodes : Dict NodeId Node
     , root : Maybe Leaf
     , invalidate: Invalidate
     -- , cursor: Maybe Leaf
@@ -56,6 +57,9 @@ init = empty
 addMesh : Uniforms -> Mesh Vertex -> Graph -> Graph
 addMesh uniforms mesh graph  =
     graph -- FIXME: implement
+     -- We need State here (it has Uniforms for Entity creation),
+     -- if we want to create Entity here (may be we don't need it here, but in State?)
+     -- But if we use it, we have a recursive dependency
 
 -- attach : List Leaf -> Graph -> Graph
 -- attach leaves graph =
