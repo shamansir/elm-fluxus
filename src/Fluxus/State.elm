@@ -78,10 +78,10 @@ withPerspective perspective state =
 
 -- type EntityConversionError = MeshNotFound Int | TextureNotFound Int
 
-noTexture : Texture
-noTexture = Nothing
+noTexture : TextureId
+noTexture = -1
 
-toEntityF : Maybe Mesh -> Maybe Texture -> State -> Maybe Entity
+toEntityF : Maybe (Mesh Vertex) -> Maybe Texture -> State -> Maybe Entity
 toEntityF maybeMesh maybeTexture state =
     case ( maybeMesh, maybeTexture ) of
         ( Just mesh, Nothing ) ->
@@ -89,18 +89,14 @@ toEntityF maybeMesh maybeTexture state =
                 Link.vertexShader
                 Link.fragmentShader
                 mesh
-                { texture = noTexture
-                , perspective = state.perspective
-                }
+                (state |> toUniforms)
             )
         ( Just mesh, Just texture ) ->
             Just (WebGL.entity
                 Link.vertexShader
                 Link.fragmentShader
                 mesh
-                { texture = texture
-                , perspective = state.perspective
-                }
+                (state |> toUniforms)
             )
         _ -> Nothing
 
@@ -109,17 +105,17 @@ toEntity instance resources state =
     case instance of
         Solid meshId ->
             let
-                maybeMesh = resources |> Resources.findMesh instance.mesh
+                maybeMesh = resources |> Resources.findMesh meshId
             in
                 toEntityF maybeMesh Nothing state
         Textured meshId textureId ->
             let
-                maybeMesh = resources |> Resources.findMesh instance.mesh
-                maybeTexture = resources |> Resources.findTexture instance.texture
+                maybeMesh = resources |> Resources.findMesh meshId
+                maybeTexture = resources |> Resources.findTexture textureId
             in
                 toEntityF maybeMesh maybeTexture state
         Colored meshId _ ->
             let
-                maybeMesh = resources |> Resources.findMesh instance.mesh
+                maybeMesh = resources |> Resources.findMesh meshId
             in
                 toEntityF maybeMesh Nothing state

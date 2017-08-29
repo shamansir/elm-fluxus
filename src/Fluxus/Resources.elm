@@ -9,8 +9,10 @@ import Dict exposing (Dict)
 
 import WebGL exposing (Mesh, Texture)
 
+import Fluxus.Link exposing (Vertex)
+
 type alias Resources =
-    { meshes: Dict Int Mesh
+    { meshes: Dict Int (Mesh Vertex)
     , textures: Dict Int Texture
     }
 
@@ -20,7 +22,7 @@ init =
     , textures = Dict.empty
     }
 
-findMesh : Int -> Resources -> Maybe Mesh
+findMesh : Int -> Resources -> Maybe (Mesh Vertex)
 findMesh id resources =
     resources.meshes |> Dict.get id
 
