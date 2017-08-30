@@ -9,14 +9,13 @@ module Fluxus.Action exposing
     , buildCube
     )
 
-import Fluxus.Primitive as Primitive exposing (..)
-
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 
 import WebGL exposing (Mesh, Texture, Entity)
 
 import Fluxus.Core as Core exposing (toRadians)
+import Fluxus.Primitive as Primitive exposing (..)
 import Fluxus.Link as Link exposing (Uniforms, Vertex, toEntity)
 
 type Action =

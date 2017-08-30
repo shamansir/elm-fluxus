@@ -5,7 +5,7 @@ module Fluxus.Graph exposing
     , init
     , empty
     , join
-    , addMesh
+    , add
     , flatten
     )
 
@@ -22,40 +22,55 @@ type alias TextureId = Int
 
 type alias Geometry = MeshId
 
-type Instance = Solid Geometry | Textured Geometry TextureId | Colored Geometry Vec3
+type Instance = Null | Solid Geometry | Textured Geometry TextureId | Colored Geometry Vec3
 
 type Invalidate = None | All | Some (List NodeId)
 
 type alias Node =
-    { instance: Instance
-    , entity: Entity
+    { instance : Instance
+    , entity : Maybe Entity
     }
 
 type Leaf =
-    Leaf { node: NodeId
-         , children: List Leaf
-         , parent: NodeId
+    Leaf { node : NodeId
+         , children : List Leaf
+         , parent : Maybe NodeId
          }
 
 type alias Graph =
     { nodes : Dict NodeId Node
-    , root : Maybe Leaf
+    , root : Leaf
+    , cursor : NodeId
     , invalidate: Invalidate
     -- , cursor: Maybe Leaf
     }
 
 empty : Graph
 empty =
-    { nodes = Dict.empty
-    , root = Nothing
-    , invalidate = None
-    }
+    let
+        rootId = 0
+        rootNode =
+            { instance = Null
+            , entity = Nothing
+            }
+        nodes =  Dict.empty |> Dict.insert rootId rootNode
+        rootLeaf = Leaf
+            { node = rootId
+            , children = []
+            , parent = Nothing
+            }
+    in
+        { nodes = Dict.empty
+        , root = rootLeaf
+        , cursor = rootId
+        , invalidate = None
+        }
 
 init : Graph
 init = empty
 
-addMesh : Uniforms -> Mesh Vertex -> Graph -> Graph
-addMesh uniforms mesh graph  =
+add : Instance -> Graph -> Graph
+add instance graph  =
     graph -- FIXME: implement
      -- We need State here (it has Uniforms for Entity creation),
      -- if we want to create Entity here (may be we don't need it here, but in State?)
@@ -91,9 +106,7 @@ join firstGraph secondGraph =
 
 flatten : Graph -> List Entity
 flatten graph =
-    graph.root
-        |> Maybe.map (flattenLeaf graph)
-        |> Maybe.withDefault []
+    graph.root |> flattenLeaf graph
 
 flattenLeaves : Graph -> List Leaf -> List Entity
 flattenLeaves graph leaves  =
@@ -106,7 +119,9 @@ flattenLeaf graph leaf =
             case graph.nodes |> Dict.get def.node of
                 Just node ->
                     let
-                        { entity } = node
+                        maybeEntity = node.entity
                     in
-                        [ entity ] ++ (def.children |> flattenLeaves graph)
+                        case maybeEntity of
+                            Just entity -> [ entity ] ++ (def.children |> flattenLeaves graph)
+                            Nothing -> (def.children |> flattenLeaves graph)
                 Nothing -> []
