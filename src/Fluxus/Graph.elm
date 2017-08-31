@@ -5,7 +5,8 @@ module Fluxus.Graph exposing
     , init
     , empty
     , join
-    , add
+    --, dive
+    , addAtCursor
     , flatten
     )
 
@@ -15,6 +16,7 @@ import WebGL exposing (Entity, Mesh)
 import Math.Vector3 as Vec3 exposing (Vec3)
 
 import Fluxus.Link exposing (Uniforms, Vertex, vertexShader, fragmentShader)
+import Fluxus.Resources exposing (..)
 
 type alias NodeId = Int
 type alias MeshId = Int
@@ -34,44 +36,96 @@ type alias Node =
 type Leaf =
     Leaf { node : NodeId
          , children : List Leaf
-         , parent : Maybe NodeId
+         , parent : Maybe Leaf
          }
 
 type alias Graph =
     { nodes : Dict NodeId Node
     , root : Leaf
-    , cursor : NodeId
+    , cursor : Leaf
     , invalidate: Invalidate
     -- , cursor: Maybe Leaf
     }
 
+nullNodeId : NodeId
+nullNodeId = 0
+
 empty : Graph
 empty =
     let
-        rootId = 0
-        rootNode =
-            { instance = Null
-            , entity = Nothing
-            }
-        nodes =  Dict.empty |> Dict.insert rootId rootNode
+        rootNode = nullNode
+        nodes =  Dict.empty |> Dict.insert nullNodeId rootNode
         rootLeaf = Leaf
-            { node = rootId
+            { node = nullNodeId
             , children = []
             , parent = Nothing
             }
     in
         { nodes = Dict.empty
         , root = rootLeaf
-        , cursor = rootId
+        , cursor = rootLeaf
         , invalidate = None
         }
 
 init : Graph
 init = empty
 
-add : Instance -> Graph -> Graph
-add instance graph  =
-    graph -- FIXME: implement
+nullNode : Node
+nullNode =
+    { instance = Null
+    , entity = Nothing
+    }
+
+getNodeById : NodeId -> Graph -> Node
+getNodeById nodeId graph =
+    graph.nodes |> Dict.get nodeId
+
+getNodeAtCursor : Graph -> Node
+getNodeAtCursor graph =
+    getNodeById graph.cursor.node
+
+-- dive : Graph -> Graph
+-- dive graph =
+--     let
+--         cursor = graph.cursor
+--         branch = nullNode
+--         branchLeaf =
+--             { node = nullNode
+--             , children = []
+--             , parent = { cursor | children = cursor.children ++ [ branchLeaf ] }
+--             }
+--     in
+--         { graph
+--         | cursor = branchLeaf
+--         }
+
+addAtCursor : Instance -> Resources -> Graph -> Graph
+addAtCursor instance resources graph =
+    let
+        cursor = graph.cursor
+        nodeId = Dict.size graph.nodes
+        newNode =
+            { instance = instance
+            , entity = State.toEntity instance resources
+            }
+        updatedGraph =
+            { graph
+            | nodes = Dict.insert nodeId newNode
+            }
+        newLeaf =
+            { node = nodeId
+            , children = []
+            , parent = cursor
+            }
+    in
+        { updatedGraph
+        | cursor =
+            { cursor
+            | children = cursor.children ++ [ newLeaf ]
+            }
+        }
+
+    -- FIXME: implement
      -- We need State here (it has Uniforms for Entity creation),
      -- if we want to create Entity here (may be we don't need it here, but in State?)
      -- But if we use it, we have a recursive dependency
@@ -120,8 +174,9 @@ flattenLeaf graph leaf =
                 Just node ->
                     let
                         maybeEntity = node.entity
+                        flattenedChildren = (def.children |> flattenLeaves graph)
                     in
                         case maybeEntity of
-                            Just entity -> [ entity ] ++ (def.children |> flattenLeaves graph)
-                            Nothing -> (def.children |> flattenLeaves graph)
+                            Just entity -> [ entity ] ++ flattenedChildren
+                            Nothing -> flattenedChildren
                 Nothing -> []
