@@ -15,8 +15,8 @@ import Dict exposing (..)
 import WebGL exposing (Entity, Mesh)
 import Math.Vector3 as Vec3 exposing (Vec3)
 
-import Fluxus.Link exposing (Uniforms, Vertex, vertexShader, fragmentShader)
-import Fluxus.Resources exposing (..)
+-- import Fluxus.Link exposing (Uniforms, Vertex, vertexShader, fragmentShader)
+-- import Fluxus.Resources exposing (..)
 
 type alias NodeId = Int
 type alias MeshId = Int
@@ -76,13 +76,14 @@ nullNode =
     , entity = Nothing
     }
 
-getNodeById : NodeId -> Graph -> Node
+getNodeById : NodeId -> Graph -> Maybe Node
 getNodeById nodeId graph =
     graph.nodes |> Dict.get nodeId
 
-getNodeAtCursor : Graph -> Node
+getNodeAtCursor : Graph -> Maybe Node
 getNodeAtCursor graph =
-    getNodeById graph.cursor.node
+    case graph.cursor of
+        Leaf definition -> graph |> getNodeById definition.node
 
 -- dive : Graph -> Graph
 -- dive graph =
@@ -99,30 +100,33 @@ getNodeAtCursor graph =
 --         | cursor = branchLeaf
 --         }
 
-addAtCursor : Instance -> Resources -> Graph -> Graph
-addAtCursor instance resources graph =
+addAtCursor : Instance -> Entity -> Graph -> Graph
+addAtCursor instance entity graph =
     let
         cursor = graph.cursor
         nodeId = Dict.size graph.nodes
         newNode =
             { instance = instance
-            , entity = State.toEntity instance resources
+            , entity = Just entity
             }
         updatedGraph =
             { graph
-            | nodes = Dict.insert nodeId newNode
+            | nodes = Dict.insert nodeId newNode graph.nodes
             }
         newLeaf =
-            { node = nodeId
-            , children = []
-            , parent = cursor
-            }
+            Leaf
+                { node = nodeId
+                , children = []
+                , parent = Just cursor
+                }
+        newChildren = case cursor of
+            Leaf definition -> definition.children ++ [ newLeaf ]
+        newCursor = case cursor of
+            Leaf definition ->
+                Leaf { definition | children = newChildren }
     in
         { updatedGraph
-        | cursor =
-            { cursor
-            | children = cursor.children ++ [ newLeaf ]
-            }
+        | cursor = newCursor
         }
 
     -- FIXME: implement
