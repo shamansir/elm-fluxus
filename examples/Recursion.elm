@@ -2,7 +2,7 @@ import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 
 import Fluxus.Program as Fx
 import Fluxus.State exposing (..)
-import Fluxus.Primitive as Primitive exposing (..)
+import Fluxus.Action exposing (..)
 
 drawRow : Int -> State -> State
 drawRow count state =

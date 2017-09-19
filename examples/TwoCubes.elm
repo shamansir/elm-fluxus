@@ -1,7 +1,7 @@
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 
 import Fluxus.Program as Fx
-import Fluxus.State exposing (..)
+import Fluxus.Action exposing (..)
 
 main : Fx.FluxusProgram
 main =

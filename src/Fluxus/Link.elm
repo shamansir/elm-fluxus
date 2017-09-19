@@ -3,6 +3,8 @@ module Fluxus.Link exposing
     , toEntity
     , Vertex
     , Uniforms
+    , vertexShader
+    , fragmentShader
     )
 
 import Math.Matrix4 as Mat4 exposing (Mat4)
